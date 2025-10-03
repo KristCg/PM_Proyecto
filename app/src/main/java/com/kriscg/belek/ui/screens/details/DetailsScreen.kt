@@ -1,4 +1,4 @@
-package com.kriscg.belek.Screens.details
+package com.kriscg.belek.ui.screens.details
 
 import com.kriscg.belek.R
 import androidx.compose.foundation.Image
