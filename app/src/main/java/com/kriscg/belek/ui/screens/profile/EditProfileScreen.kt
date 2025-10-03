@@ -1,4 +1,4 @@
-package com.kriscg.belek.ui.screens.Profile
+package com.kriscg.belek.ui.screens.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
