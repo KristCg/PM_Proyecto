@@ -1,8 +1,5 @@
 package com.kriscg.belek.Screens.Profile
 
-import android.R
-import androidx.compose.animation.core.estimateAnimationDurationMillis
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,7 +65,7 @@ fun EditProfileScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.AccountCircle,
-                contentDescription = "Perfil",
+                contentDescription = "Foto de Perfil",
                 modifier = Modifier
                     .size(175.dp),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -154,10 +151,10 @@ fun InfoContent(
     }
 }
 
-@Preview(showBackground = true)
+/*@Preview(showBackground = true)
 @Composable
 fun PreviewScreenContent() {
     MaterialTheme {
         EditProfileScreen(modifier = Modifier)
     }
-}
+}*/
