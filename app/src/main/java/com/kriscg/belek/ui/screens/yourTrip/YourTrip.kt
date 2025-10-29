@@ -42,7 +42,10 @@ import com.kriscg.belek.R
 import com.kriscg.belek.ui.theme.BelekTheme
 
 @Composable
-fun TuViajeScreen() {
+fun TuViajeScreen(
+    onBackClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     var selectedTipoLugar by remember { mutableStateOf(setOf("Naturales", "Históricos"))}
     var selectedAmbiente by remember { mutableStateOf(setOf("Románticos", "Familiares")) }
     var selectedServicios by remember { mutableStateOf(setOf("Estacionamiento", "Wifi", "Petfriendly") )}
@@ -66,7 +69,7 @@ fun TuViajeScreen() {
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 contentDescription = "Volver",
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { }
+                modifier = Modifier.clickable { onBackClick()}
             )
             Text(
                 text = "TU VIAJE",

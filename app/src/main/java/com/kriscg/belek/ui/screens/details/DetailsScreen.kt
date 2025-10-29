@@ -114,7 +114,9 @@ fun CustomTabs(
 }
 
 @Composable
-fun DetailsContent (
+fun DetailsScreen (
+    lugarId: Int = 0,
+    onBackClick: () -> Unit = {}
 ){
     var selectedTab by remember { mutableIntStateOf(0) }
     var showReviewDialog by remember { mutableStateOf(false) }
@@ -133,7 +135,7 @@ fun DetailsContent (
                 verticalAlignment = Alignment.CenterVertically
             ){
                 Button(
-                    onClick = {},
+                    onClick = onBackClick,
                     colors = ButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary,
                         containerColor = Color.Transparent,
@@ -615,6 +617,6 @@ fun RatingsContent() {
 @Composable
 fun PreviewDetailsScreen(){
     BelekTheme {
-        DetailsContent()
+        DetailsScreen()
     }
 }

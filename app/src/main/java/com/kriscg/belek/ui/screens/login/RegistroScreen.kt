@@ -1,28 +1,28 @@
 package com.kriscg.belek.ui.screens.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.R.attr.logo
 import com.kriscg.belek.R
 
 
 @Composable
 fun RegistroScreen(
+    onRegistroClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ){
     val username = remember { mutableStateOf("") }
+    val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
 
     Box(
@@ -60,7 +60,7 @@ fun RegistroScreen(
             Spacer(Modifier.height(20.dp))
 
             TextField(
-                value = password.value,
+                value = email.value,
                 onValueChange = { password.value = it },
                 shape = RoundedCornerShape(20.dp),
                 placeholder = { Text("Correo") },
@@ -81,7 +81,7 @@ fun RegistroScreen(
 
 
             Button(
-                onClick = { },
+                onClick = onRegistroClick,
                 modifier = Modifier
                     .width(150.dp)
                     .height(50.dp),

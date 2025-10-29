@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.DateRange
 import com.kriscg.belek.ui.theme.BelekTheme
 
 data class Lugar(
+    val id: Int,
     val nombre: String,
     val descripcion: String,
     val imageRes: Int
@@ -181,15 +182,24 @@ fun CustomTabs(
 }
 
 @Composable
-fun ListaContent(lugares: List<Lugar>) {
+fun ListaContent(
+    lugares: List<Lugar>,
+    onLugarClick: (Int) -> Unit = {}
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(lugares) { lugar ->
-            LugarCard(lugar)
+        items(
+            items = lugares,
+            key = { lugar -> lugar.id }
+        ) { lugar ->
+            LugarCard(
+                lugar = lugar,
+                onClick = { onLugarClick(lugar.id) }
+            )
         }
     }
 }
@@ -215,20 +225,22 @@ fun MapContent() {
     }
 }
 
-// -----------------------------
-// Pantalla principal
-// -----------------------------
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    onNuevoViajeClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
+    onLugarClick: (Int) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     var query by remember { mutableStateOf("") }
     var selectedTab by remember { mutableStateOf(0) }
 
     val lugares = listOf(
-        Lugar("Tikal, Guatemala", "Antigua capital maya entre la selva.", R.drawable.tikal),
-        Lugar("Antigua Guatemala", "Ciudad colonial rodeada de volcanes.", R.drawable.antigua),
-        Lugar("Lago de Atitlán", "El lago más bello del mundo con pueblos llenos de color.", R.drawable.atitlan),
-        Lugar("Semuc Champey", "Piscinas naturales de aguas turquesas en medio de la jungla.", R.drawable.semuc)
+        Lugar(1, "Tikal, Guatemala", "Antigua capital maya entre la selva.", R.drawable.tikal),
+        Lugar(2, "Antigua Guatemala", "Ciudad colonial rodeada de volcanes.", R.drawable.antigua),
+        Lugar(3, "Lago de Atitlán", "El lago más bello del mundo con pueblos llenos de color.", R.drawable.atitlan),
+        Lugar(4, "Semuc Champey", "Piscinas naturales de aguas turquesas en medio de la jungla.", R.drawable.semuc)
     )
 
     Column(
@@ -238,7 +250,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Encabezado
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -256,7 +268,8 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clickable { onProfileClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -302,7 +315,6 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         )
 
 
-        // Sección Lugares + Tabs
         Text(
             text = "Lugares Populares",
             fontWeight = FontWeight.Bold,
@@ -319,19 +331,26 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             1 -> MapContent()
         }
     }
-    FloatingMenuButton()
+    FloatingMenuButton(
+        onNuevoViaje = onNuevoViajeClick,
+        onCalendario = {}
+    )
 }
 
 
 
 @Composable
-fun LugarCard(lugar: Lugar) {
+fun LugarCard(
+    lugar: Lugar,
+    onClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
             .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(16.dp))
+            .clickable { onClick() }
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

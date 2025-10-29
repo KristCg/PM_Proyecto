@@ -47,6 +47,8 @@ val intereses = listOf("Gastronomía", "Fotografía", "Artesanías y compras", "
 
 @Composable
 fun EncuestaScreen(
+    onVerOpcionesClick: () -> Unit = {},
+    onBackClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ){
     val destino = remember { mutableStateOf("") }
@@ -182,7 +184,7 @@ fun EncuestaScreen(
             Spacer(Modifier.height(30.dp))
 
             Button(
-                onClick = { },
+                onClick = onVerOpcionesClick,
                 modifier = Modifier
                     .width(150.dp)
                     .height(50.dp)
