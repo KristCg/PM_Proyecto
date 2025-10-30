@@ -262,11 +262,11 @@ fun ContenidoLista(items: List<String>, bordeColor: Color) {
     }
 }
 
-@Preview(showBackground = true)
+/*@Preview(showBackground = true)
 @Composable
 fun PreviewProfileScreenContent() {
     BelekTheme {
         ProfileScreen(modifier = Modifier)
     }
-}
+}*/
 
