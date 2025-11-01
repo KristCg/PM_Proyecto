@@ -13,7 +13,6 @@ fun NavGraphBuilder.homeNavigation(
     onNavigateToDetails: (Int) -> Unit,
     onNavigateToProfile: () -> Unit,
     onToConfig: () -> Unit
-
 ) {
     composable<Home> {
         HomeScreen(
@@ -23,11 +22,10 @@ fun NavGraphBuilder.homeNavigation(
                 when (menuItem) {
                     "Ver perfil" -> onNavigateToProfile()
                     "Configuración y privacidad" -> {}
-                    "Cerrar Sesión" -> {onToConfig()}
+                    "Cerrar Sesión" -> onToConfig()
                     "Historial" -> {}
                 }
             }
         )
     }
 }
-

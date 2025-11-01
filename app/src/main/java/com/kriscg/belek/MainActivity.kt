@@ -16,7 +16,7 @@ import com.kriscg.belek.ui.navigation.yourTrip.YourTrip
 import com.kriscg.belek.ui.navigation.details.Details
 import com.kriscg.belek.ui.navigation.profile.ProfileScreen
 import com.kriscg.belek.ui.navigation.config.Config
-import com.kriscg.belek.ui.screens.profile.EditProfileScreen
+import com.kriscg.belek.ui.navigation.profile.EditProfile
 import com.kriscg.belek.ui.navigation.login.authNavigation
 import com.kriscg.belek.ui.navigation.home.homeNavigation
 import com.kriscg.belek.ui.navigation.encuestas.encuestaNavigation
@@ -64,7 +64,7 @@ fun AppNavigation() {
             onNavigateToDetails = { lugarId ->
                 navController.navigate(Details(lugarId = lugarId))
             },
-            onToProfile = {
+            onNavigateToProfile = {
                 navController.navigate(ProfileScreen)
             },
             onToConfig = {
