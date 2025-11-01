@@ -14,13 +14,17 @@ import com.kriscg.belek.ui.navigation.home.Home
 import com.kriscg.belek.ui.navigation.encuestas.Encuesta
 import com.kriscg.belek.ui.navigation.yourTrip.YourTrip
 import com.kriscg.belek.ui.navigation.details.Details
-import com.kriscg.belek.ui.navigation.profile.EditProfile
+import com.kriscg.belek.ui.navigation.profile.ProfileScreen
+import com.kriscg.belek.ui.navigation.config.Config
+import com.kriscg.belek.ui.screens.profile.EditProfileScreen
 import com.kriscg.belek.ui.navigation.login.authNavigation
 import com.kriscg.belek.ui.navigation.home.homeNavigation
 import com.kriscg.belek.ui.navigation.encuestas.encuestaNavigation
 import com.kriscg.belek.ui.navigation.yourTrip.yourTripNavigation
 import com.kriscg.belek.ui.navigation.details.detailsNavigation
 import com.kriscg.belek.ui.navigation.profile.profileNavigation
+import com.kriscg.belek.ui.navigation.config.configNavigation
+import com.kriscg.belek.ui.navigation.profile.editProfileNavigation
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,11 +64,13 @@ fun AppNavigation() {
             onNavigateToDetails = { lugarId ->
                 navController.navigate(Details(lugarId = lugarId))
             },
-            onNavigateToProfile = {
-                navController.navigate(EditProfile)
+            onToProfile = {
+                navController.navigate(ProfileScreen)
+            },
+            onToConfig = {
+                navController.navigate(Config)
             }
         )
-
 
         encuestaNavigation(
             onNavigateToYourTrip = {
@@ -88,6 +94,21 @@ fun AppNavigation() {
         )
 
         profileNavigation(
+            onNavigateBack = {
+                navController.popBackStack()
+            },
+            onToEditProfile = {
+                navController.navigate(EditProfile)
+            }
+        )
+
+        configNavigation(
+            onNavigateBack = {
+                navController.popBackStack()
+            }
+        )
+
+        editProfileNavigation(
             onNavigateBack = {
                 navController.popBackStack()
             }

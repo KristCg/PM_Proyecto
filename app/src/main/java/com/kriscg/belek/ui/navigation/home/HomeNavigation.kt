@@ -11,13 +11,23 @@ object Home
 fun NavGraphBuilder.homeNavigation(
     onNavigateToEncuesta: () -> Unit,
     onNavigateToDetails: (Int) -> Unit,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onToConfig: () -> Unit
+
 ) {
     composable<Home> {
         HomeScreen(
             onNuevoViajeClick = onNavigateToEncuesta,
-            onProfileClick = onNavigateToProfile,
-            onLugarClick = onNavigateToDetails
+            onLugarClick = onNavigateToDetails,
+            onMenuItemClick = { menuItem ->
+                when (menuItem) {
+                    "Ver perfil" -> onNavigateToProfile()
+                    "Configuración y privacidad" -> {}
+                    "Cerrar Sesión" -> {onToConfig()}
+                    "Historial" -> {}
+                }
+            }
         )
     }
 }
+

@@ -7,13 +7,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +37,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import com.kriscg.belek.ui.theme.BelekTheme
+import kotlinx.coroutines.launch
 
 data class Lugar(
     val id: Int,
@@ -225,12 +232,92 @@ fun MapContent() {
     }
 }
 
+@Composable
+fun ProfileDrawerContent(
+    onMenuItemClick: (String) -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(280.dp)
+            .background(MaterialTheme.colorScheme.surface)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "Usuario",
+                    modifier = Modifier.size(64.dp),
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Nombre de Usuario",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
 
+        val menuItems = listOf(
+            "Ver perfil" to Icons.Default.AccountCircle,
+            "Agregar otra cuenta" to Icons.Default.Add,
+            "Historial" to Icons.Default.Menu,
+            "Configuración y privacidad" to Icons.Default.Settings,
+            "Cerrar Sesión" to Icons.Default.ExitToApp,
+        )
+
+        menuItems.forEachIndexed { index, (title, icon) ->
+            if (index == 2 || index == 4) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    thickness = 0.5.dp
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onMenuItemClick(title) }
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = title,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNuevoViajeClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {},
+    onToProfile: () -> Unit = {},
     onLugarClick: (Int) -> Unit = {},
+    onMenuItemClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var query by remember { mutableStateOf("") }
@@ -243,97 +330,116 @@ fun HomeScreen(
         Lugar(4, "Semuc Champey", "Piscinas naturales de aguas turquesas en medio de la jungla.", R.drawable.semuc)
     )
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "HOGAR",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 32.sp
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .clickable { onProfileClick() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Perfil",
-                    tint = MaterialTheme.colorScheme.primary
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                ProfileDrawerContent(
+                    onMenuItemClick = { item ->
+                        onMenuItemClick(item)
+                        scope.launch { drawerState.close() }
+                    }
                 )
             }
-        }
+        },
+        content = {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "HOGAR",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 32.sp
+                    )
 
-        TextField(
-            value = query,
-            onValueChange = { query = it },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Buscar",
-                    tint = MaterialTheme.colorScheme.primary
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .clickable { scope.launch {
+                                drawerState.open()
+                            } },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Perfil",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                TextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Buscar",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    placeholder = {
+                        Text(
+                            text = "Buscar",
+                            color = Color.Gray,
+                            fontSize = 16.sp
+                        )
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(24.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFE6F4F1),
+                        unfocusedContainerColor = Color(0xFFE6F4F1),
+                        disabledContainerColor = Color(0xFFE6F4F1),
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
                 )
-            },
-            placeholder = {
+
+
                 Text(
-                    text = "Buscar",
-                    color = Color.Gray,
-                    fontSize = 16.sp
+                    text = "Lugares Populares",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
                 )
-            },
-            singleLine = true,
-            shape = RoundedCornerShape(24.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFE6F4F1),
-                unfocusedContainerColor = Color(0xFFE6F4F1),
-                disabledContainerColor = Color(0xFFE6F4F1),
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
-            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        )
 
+                CustomTabs(
+                    selectedTab = selectedTab,
+                    onTabSelected = { selectedTab = it }
+                )
 
-        Text(
-            text = "Lugares Populares",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
-        )
-
-        CustomTabs(
-            selectedTab = selectedTab,
-            onTabSelected = { selectedTab = it }
-        )
-
-        when (selectedTab) {
-            0 -> ListaContent(lugares)
-            1 -> MapContent()
+                when (selectedTab) {
+                    0 -> ListaContent(lugares)
+                    1 -> MapContent()
+                }
+            }
+            FloatingMenuButton(
+                onNuevoViaje = onNuevoViajeClick,
+                onCalendario = {}
+            )
         }
-    }
-    FloatingMenuButton(
-        onNuevoViaje = onNuevoViajeClick,
-        onCalendario = {}
     )
 }
 
