@@ -69,6 +69,13 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.compose.navigation)
     implementation(libs.kotlinx.serialization.json)
-
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.5.3")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.5.3")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.5.3")
+    implementation("io.ktor:ktor-client-android:2.3.11")
+    implementation("io.ktor:ktor-client-core:2.3.7")
+    implementation("io.ktor:ktor-utils:2.3.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
 }
