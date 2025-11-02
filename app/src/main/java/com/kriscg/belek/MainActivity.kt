@@ -103,6 +103,11 @@ fun AppNavigation() {
         yourTripNavigation(
             onNavigateBack = {
                 navController.navigateUp()
+            },
+            onNavigateToDetails = { lugarId ->
+                navController.navigate(Details(lugarId = lugarId)) {
+                    launchSingleTop = true
+                }
             }
         )
 

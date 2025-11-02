@@ -9,11 +9,13 @@ import com.kriscg.belek.ui.screens.yourTrip.TuViajeScreen
 object YourTrip
 
 fun NavGraphBuilder.yourTripNavigation(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToDetails: (Int) -> Unit
 ) {
     composable<YourTrip> {
         TuViajeScreen(
-            onBackClick = onNavigateBack
+            onBackClick = onNavigateBack,
+            onLugarClick = onNavigateToDetails
         )
     }
 }

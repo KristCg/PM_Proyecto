@@ -431,7 +431,10 @@ fun HomeScreen(
                 )
 
                 when (selectedTab) {
-                    0 -> ListaContent(lugares)
+                    0 -> ListaContent(
+                        lugares = lugares,
+                        onLugarClick = onLugarClick
+                    )
                     1 -> MapContent()
                 }
             }
@@ -442,8 +445,6 @@ fun HomeScreen(
         }
     )
 }
-
-
 
 @Composable
 fun LugarCard(

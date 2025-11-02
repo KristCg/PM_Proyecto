@@ -44,6 +44,7 @@ import com.kriscg.belek.ui.theme.BelekTheme
 @Composable
 fun TuViajeScreen(
     onBackClick: () -> Unit = {},
+    onLugarClick: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedTipoLugar by remember { mutableStateOf(setOf("Naturales", "Históricos"))}
@@ -165,16 +166,20 @@ fun TuViajeScreen(
         ) {
             item {
                 PlaceCard(
+                    lugarId = 1,
                     title = "Antigua Guatemala",
                     description = "Ciudad colonial\nrodeada de volcanes.",
-                    imageRes = R.drawable.tikal_prueba
+                    imageRes = R.drawable.tikal_prueba,
+                    onClick = { onLugarClick(1) }
                 )
             }
             item {
                 PlaceCard(
+                    lugarId = 2,
                     title = "Museo Miraflores",
                     description = "Museo sobre ruinas\nmayas con artefactos\nantiguos.",
-                    imageRes = R.drawable.tikal_prueba
+                    imageRes = R.drawable.tikal_prueba,
+                    onClick = { onLugarClick(2) }
                 )
             }
         }
@@ -228,14 +233,17 @@ fun MultiFilterSection(
 
 @Composable
 fun PlaceCard(
+    lugarId: Int,
     title: String,
     description: String,
-    imageRes: Int
+    imageRes: Int,
+    onClick: () -> Unit = {}
 ) {
     OutlinedCard(
         modifier = Modifier
             .width(200.dp)
-            .height(240.dp),
+            .height(240.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.outlinedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
