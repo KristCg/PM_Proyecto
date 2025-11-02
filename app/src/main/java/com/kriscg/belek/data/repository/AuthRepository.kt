@@ -16,7 +16,8 @@ class AuthRepository {
                 this.password = password
             }
 
-            val userId = client.auth.currentUserOrNull()?.id ?: throw Exception("User ID not found")
+            val userId = client.auth.currentUserOrNull()?.id
+                ?: throw Exception("User ID not found")
 
             client.from("usuarios").insert(
                 Usuario(

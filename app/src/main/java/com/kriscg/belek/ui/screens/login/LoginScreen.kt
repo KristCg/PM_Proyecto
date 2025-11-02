@@ -11,31 +11,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kriscg.belek.R
+import com.kriscg.belek.ui.viewModel.LoginViewModel
 
 @Composable
 fun LoginScreen(
+    modifier: Modifier = Modifier,
     onRegistroClick: () -> Unit = {},
     onLoginClick: () -> Unit = {},
-    modifier: Modifier = Modifier
-){
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    viewModel: LoginViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
-    Box(
-        modifier = modifier.fillMaxSize()
-    ){
-        Column (
+    // Navegar cuando el login sea exitoso
+    LaunchedEffect(uiState.loginSuccess) {
+        if (uiState.loginSuccess) {
+            onLoginClick()
+            viewModel.resetState()
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 .padding(bottom = 80.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo",
@@ -50,43 +57,70 @@ fun LoginScreen(
 
             Spacer(Modifier.height(32.dp))
 
+            if (uiState.error != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(
+                        text = uiState.error ?: "",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+
             TextField(
-                value = username,
-                onValueChange = { username = it },
+                value = uiState.username,
+                onValueChange = { viewModel.onUsernameChange(it) },
                 shape = RoundedCornerShape(20.dp),
                 placeholder = { Text("Usuario o Email") },
                 singleLine = true,
+                enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth(0.8f)
             )
 
             Spacer(Modifier.height(20.dp))
 
             TextField(
-                value = password,
-                onValueChange = { password = it },
+                value = uiState.password,
+                onValueChange = { viewModel.onPasswordChange(it) },
                 shape = RoundedCornerShape(20.dp),
                 placeholder = { Text("Contraseña") },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
+                enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth(0.8f)
             )
 
             Spacer(Modifier.height(20.dp))
 
             Button(
-                onClick = onLoginClick,
+                onClick = { viewModel.login() },
                 modifier = Modifier
                     .width(150.dp)
                     .height(50.dp),
                 shape = RoundedCornerShape(30.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF6650a4)
-                )
+                ),
+                enabled = !uiState.isLoading
             ) {
-                Text(
-                    text = "Iniciar Sesión",
-                    fontSize = 15.sp
-                )
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
+                    )
+                } else {
+                    Text(
+                        text = "Iniciar Sesión",
+                        fontSize = 15.sp
+                    )
+                }
             }
 
             Spacer(Modifier.height(16.dp))
@@ -99,7 +133,8 @@ fun LoginScreen(
                 shape = RoundedCornerShape(30.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF6650a4)
-                )
+                ),
+                enabled = !uiState.isLoading
             ) {
                 Text(
                     text = "Registrarse",
@@ -108,12 +143,4 @@ fun LoginScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LoginPreview() {
-    LoginScreen(
-        modifier = Modifier.fillMaxSize()
-    )
 }

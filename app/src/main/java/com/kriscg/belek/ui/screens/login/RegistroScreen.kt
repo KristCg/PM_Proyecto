@@ -10,32 +10,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kriscg.belek.R
-
+import com.kriscg.belek.ui.viewModel.RegistroViewModel
 
 @Composable
 fun RegistroScreen(
+    modifier: Modifier = Modifier,
     onRegistroClick: () -> Unit = {},
-    modifier: Modifier = Modifier
-){
-    val username = remember { mutableStateOf("") }
-    val email = remember { mutableStateOf("") }
-    val password = remember { mutableStateOf("") }
+    viewModel: RegistroViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
-    Box(
-        modifier = modifier.fillMaxSize()
-    ){
-        Column (
+    LaunchedEffect(uiState.registroSuccess) {
+        if (uiState.registroSuccess) {
+            onRegistroClick()
+            viewModel.resetState()
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 .padding(bottom = 80.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo",
@@ -50,63 +55,83 @@ fun RegistroScreen(
 
             Spacer(Modifier.height(32.dp))
 
+            if (uiState.error != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(
+                        text = uiState.error ?: "",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+
             TextField(
-                value = username.value,
-                onValueChange = { username.value = it },
+                value = uiState.username,
+                onValueChange = { viewModel.onUsernameChange(it) },
                 shape = RoundedCornerShape(20.dp),
                 placeholder = { Text("Usuario") },
-                singleLine = true
+                singleLine = true,
+                enabled = !uiState.isLoading,
+                modifier = Modifier.fillMaxWidth(0.8f)
             )
+
             Spacer(Modifier.height(20.dp))
 
             TextField(
-                value = email.value,
-                onValueChange = { email.value = it },
+                value = uiState.email,
+                onValueChange = { viewModel.onEmailChange(it) },
                 shape = RoundedCornerShape(20.dp),
                 placeholder = { Text("Correo") },
-                singleLine = true
+                singleLine = true,
+                enabled = !uiState.isLoading,
+                modifier = Modifier.fillMaxWidth(0.8f)
             )
 
             Spacer(Modifier.height(20.dp))
 
             TextField(
-                value = password.value,
-                onValueChange = { password.value = it },
+                value = uiState.password,
+                onValueChange = { viewModel.onPasswordChange(it) },
                 shape = RoundedCornerShape(20.dp),
                 placeholder = { Text("Contraseña") },
-                singleLine = true
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                enabled = !uiState.isLoading,
+                modifier = Modifier.fillMaxWidth(0.8f)
             )
 
             Spacer(Modifier.height(20.dp))
 
-
             Button(
-                onClick = onRegistroClick,
+                onClick = { viewModel.register() },
                 modifier = Modifier
                     .width(150.dp)
                     .height(50.dp),
                 shape = RoundedCornerShape(30.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF6650a4)
-                )
+                ),
+                enabled = !uiState.isLoading
             ) {
-                Text(
-                    text = "Registrarse",
-                    fontSize = 15.sp
-                )
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
+                    )
+                } else {
+                    Text(
+                        text = "Registrarse",
+                        fontSize = 15.sp
+                    )
+                }
             }
         }
     }
-}
-
-
-
-
-
-@Preview(showBackground = true)
-@Composable
-private fun RegistroPreview() {
-    RegistroScreen(
-        modifier = Modifier.fillMaxSize()
-    )
 }

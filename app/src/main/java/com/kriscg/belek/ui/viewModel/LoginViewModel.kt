@@ -34,7 +34,6 @@ class LoginViewModel(
     fun login() {
         val state = _uiState.value
 
-        // Validaciones
         if (state.username.isBlank()) {
             _uiState.value = state.copy(error = "Por favor ingresa tu usuario o email")
             return
@@ -48,12 +47,7 @@ class LoginViewModel(
         viewModelScope.launch {
             _uiState.value = state.copy(isLoading = true, error = null)
 
-            // Determinar si es email o username
-            val email = if (state.username.contains("@")) {
-                state.username
-            } else {
-                "${state.username}@belek.app" // Usar un dominio temporal si es username
-            }
+            val email = state.username
 
             authRepository.signIn(email, state.password)
                 .onSuccess {
@@ -62,7 +56,13 @@ class LoginViewModel(
                 .onFailure { exception ->
                     _uiState.value = state.copy(
                         isLoading = false,
-                        error = exception.message ?: "Error al iniciar sesión"
+                        error = when {
+                            exception.message?.contains("Invalid login credentials") == true ->
+                                "Usuario o contraseña incorrectos"
+                            exception.message?.contains("Email not confirmed") == true ->
+                                "Por favor confirma tu email"
+                            else -> exception.message ?: "Error al iniciar sesión"
+                        }
                     )
                 }
         }
