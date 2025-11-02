@@ -61,7 +61,7 @@ fun RegistroScreen(
 
             TextField(
                 value = email.value,
-                onValueChange = { password.value = it },
+                onValueChange = { email.value = it },
                 shape = RoundedCornerShape(20.dp),
                 placeholder = { Text("Correo") },
                 singleLine = true

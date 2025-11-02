@@ -49,75 +49,88 @@ fun AppNavigation() {
     ) {
         authNavigation(
             onNavigateToRegistro = {
-                navController.navigate(Registro)
+                navController.navigate(Registro) {
+                }
             },
             onNavigateToHome = {
                 navController.navigate(Home) {
-                    popUpTo<AuthGraph> { inclusive = true }
+                    popUpTo(AuthGraph) { inclusive = true }
+                    launchSingleTop = true
                 }
             }
         )
 
         homeNavigation(
             onNavigateToEncuesta = {
-                navController.navigate(Encuesta)
+                navController.navigate(Encuesta) {
+                    launchSingleTop = true
+                }
             },
             onNavigateToDetails = { lugarId ->
-                navController.navigate(Details(lugarId = lugarId))
+                navController.navigate(Details(lugarId = lugarId)) {
+                    launchSingleTop = true
+                }
             },
             onNavigateToProfile = {
-                navController.navigate(ProfileScreen)
+                navController.navigate(ProfileScreen) {
+                    launchSingleTop = true
+                }
             },
             onToConfig = {
-                navController.navigate(Config)
+                navController.navigate(Config) {
+                    launchSingleTop = true
+                }
             },
             onLogout = {
                 navController.navigate(Login) {
-                    popUpTo(Home) { inclusive = true }
-            }
+                    popUpTo(0) { inclusive = true }
+                    launchSingleTop = true
+                }
             }
         )
 
-
         encuestaNavigation(
             onNavigateToYourTrip = {
-                navController.navigate(YourTrip)
+                navController.navigate(YourTrip) {
+                    launchSingleTop = true
+                }
             },
             onNavigateBack = {
-                navController.popBackStack()
+                navController.navigateUp()
             }
         )
 
         yourTripNavigation(
             onNavigateBack = {
-                navController.popBackStack()
+                navController.navigateUp()
             }
         )
 
         detailsNavigation(
             onNavigateBack = {
-                navController.popBackStack()
+                navController.navigateUp()
             }
         )
 
         profileNavigation(
             onNavigateBack = {
-                navController.popBackStack()
+                navController.navigateUp()
             },
             onToEditProfile = {
-                navController.navigate(EditProfile)
+                navController.navigate(EditProfile) {
+                    launchSingleTop = true
+                }
             }
         )
 
         configNavigation(
             onNavigateBack = {
-                navController.popBackStack()
+                navController.navigateUp()
             }
         )
-
         editProfileNavigation(
             onNavigateBack = {
-                navController.popBackStack()
+                navController.navigateUp()
             }
         )
     }

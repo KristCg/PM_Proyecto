@@ -10,12 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kriscg.belek.R
-
 
 @Composable
 fun LoginScreen(
@@ -23,8 +22,8 @@ fun LoginScreen(
     onLoginClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ){
-    val username = remember { mutableStateOf("") }
-    val password = remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Box(
         modifier = modifier.fillMaxSize()
@@ -52,20 +51,24 @@ fun LoginScreen(
             Spacer(Modifier.height(32.dp))
 
             TextField(
-                value = username.value,
-                onValueChange = { username.value = it },
+                value = username,
+                onValueChange = { username = it },
                 shape = RoundedCornerShape(20.dp),
-                placeholder = { Text("Usuario") },
-                singleLine = true
+                placeholder = { Text("Usuario o Email") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(0.8f)
             )
+
             Spacer(Modifier.height(20.dp))
 
             TextField(
-                value = password.value,
-                onValueChange = { password.value = it },
+                value = password,
+                onValueChange = { password = it },
                 shape = RoundedCornerShape(20.dp),
                 placeholder = { Text("Contraseña") },
-                singleLine = true
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(0.8f)
             )
 
             Spacer(Modifier.height(20.dp))
@@ -85,6 +88,7 @@ fun LoginScreen(
                     fontSize = 15.sp
                 )
             }
+
             Spacer(Modifier.height(16.dp))
 
             Button(
@@ -105,10 +109,6 @@ fun LoginScreen(
         }
     }
 }
-
-
-
-
 
 @Preview(showBackground = true)
 @Composable
