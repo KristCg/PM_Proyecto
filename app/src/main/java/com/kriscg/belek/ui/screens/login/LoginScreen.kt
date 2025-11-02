@@ -78,7 +78,7 @@ fun LoginScreen(
                 value = uiState.username,
                 onValueChange = { viewModel.onUsernameChange(it) },
                 shape = RoundedCornerShape(20.dp),
-                placeholder = { Text("Usuario o Email") },
+                placeholder = { Text("Email") },
                 singleLine = true,
                 enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth(0.8f)
