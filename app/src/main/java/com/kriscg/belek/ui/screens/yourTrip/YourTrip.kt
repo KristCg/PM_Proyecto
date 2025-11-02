@@ -1,11 +1,9 @@
 package com.kriscg.belek.ui.screens.yourTrip
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,12 +17,16 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,146 +43,148 @@ import androidx.compose.ui.unit.sp
 import com.kriscg.belek.R
 import com.kriscg.belek.ui.theme.BelekTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TuViajeScreen(
     onBackClick: () -> Unit = {},
     onLugarClick: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    var selectedTipoLugar by remember { mutableStateOf(setOf("Naturales", "Históricos"))}
+    var selectedTipoLugar by remember { mutableStateOf(setOf("Naturales", "Históricos")) }
     var selectedAmbiente by remember { mutableStateOf(setOf("Románticos", "Familiares")) }
-    var selectedServicios by remember { mutableStateOf(setOf("Estacionamiento", "Wifi", "Petfriendly") )}
-    var selectedPrecio by remember { mutableStateOf(setOf("Gama Media", "Económico"))}
+    var selectedServicios by remember { mutableStateOf(setOf("Estacionamiento", "Wifi", "Petfriendly")) }
+    var selectedPrecio by remember { mutableStateOf(setOf("Gama Media", "Económico")) }
     var selectedMomento by remember { mutableStateOf(setOf("Matutino", "Mediodía")) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "Volver",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onBackClick()}
-            )
-            Text(
-                text = "TU VIAJE",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "TU VIAJE",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
             )
         }
-
-        MultiFilterSection(
-            title = "Tipo de Lugar",
-            options = listOf(
-                "Arqueológicos", "Naturales", "Históricos", "Culturales",
-                "Ecoturísticos", "Gastronómicos", "Recreativos", "Comerciales"
-            ),
-            selectedOptions = selectedTipoLugar,
-            onOptionToggled = { option ->
-                selectedTipoLugar = if (selectedTipoLugar.contains(option)) {
-                    selectedTipoLugar - option
-                } else {
-                    selectedTipoLugar + option
-                }
-            }
-        )
-
-        MultiFilterSection(
-            title = "Ambiente",
-            options = listOf(
-                "Familiares", "Románticos", "Aventura", "Cultural",
-                "Nocturnos", "Espiritual"
-            ),
-            selectedOptions = selectedAmbiente,
-            onOptionToggled = { option ->
-                selectedAmbiente = if (selectedAmbiente.contains(option)) {
-                    selectedAmbiente - option
-                } else {
-                    selectedAmbiente + option
-                }
-            }
-        )
-
-        MultiFilterSection(
-            title = "Servicios",
-            options = listOf(
-                "Estacionamiento", "Wifi", "Petfriendly", "Accesible",
-                "Transporte Incluido", "Tours Incluidos"
-            ),
-            selectedOptions = selectedServicios,
-            onOptionToggled = { option ->
-                selectedServicios = if (selectedServicios.contains(option)) {
-                    selectedServicios - option
-                } else {
-                    selectedServicios + option
-                }
-            }
-        )
-
-        MultiFilterSection(
-            title = "Precios",
-            options = listOf(
-                "Económico", "Gama Media", "Lujo"
-            ),
-            selectedOptions = selectedPrecio,
-            onOptionToggled = { option ->
-                selectedPrecio = if (selectedPrecio.contains(option)) {
-                    selectedPrecio - option
-                } else {
-                    selectedPrecio + option
-                }
-            }
-        )
-
-        MultiFilterSection(
-            title = "Momento del Día",
-            options = listOf(
-                "Amanecer", "Matutino", "Mediodía", "Vespertino",
-                "Atardecer", "Nocturno"
-            ),
-            selectedOptions = selectedMomento,
-            onOptionToggled = { option ->
-                selectedMomento = if (selectedMomento.contains(option)) {
-                    selectedMomento - option
-                } else {
-                    selectedMomento + option
-                }
-            }
-        )
-
-
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            item {
-                PlaceCard(
-                    lugarId = 1,
-                    title = "Antigua Guatemala",
-                    description = "Ciudad colonial\nrodeada de volcanes.",
-                    imageRes = R.drawable.tikal_prueba,
-                    onClick = { onLugarClick(1) }
-                )
-            }
-            item {
-                PlaceCard(
-                    lugarId = 2,
-                    title = "Museo Miraflores",
-                    description = "Museo sobre ruinas\nmayas con artefactos\nantiguos.",
-                    imageRes = R.drawable.tikal_prueba,
-                    onClick = { onLugarClick(2) }
-                )
+            MultiFilterSection(
+                title = "Tipo de Lugar",
+                options = listOf(
+                    "Arqueológicos", "Naturales", "Históricos", "Culturales",
+                    "Ecoturísticos", "Gastronómicos", "Recreativos", "Comerciales"
+                ),
+                selectedOptions = selectedTipoLugar,
+                onOptionToggled = { option ->
+                    selectedTipoLugar = if (selectedTipoLugar.contains(option)) {
+                        selectedTipoLugar - option
+                    } else {
+                        selectedTipoLugar + option
+                    }
+                }
+            )
+
+            MultiFilterSection(
+                title = "Ambiente",
+                options = listOf(
+                    "Familiares", "Románticos", "Aventura", "Cultural",
+                    "Nocturnos", "Espiritual"
+                ),
+                selectedOptions = selectedAmbiente,
+                onOptionToggled = { option ->
+                    selectedAmbiente = if (selectedAmbiente.contains(option)) {
+                        selectedAmbiente - option
+                    } else {
+                        selectedAmbiente + option
+                    }
+                }
+            )
+
+            MultiFilterSection(
+                title = "Servicios",
+                options = listOf(
+                    "Estacionamiento", "Wifi", "Petfriendly", "Accesible",
+                    "Transporte Incluido", "Tours Incluidos"
+                ),
+                selectedOptions = selectedServicios,
+                onOptionToggled = { option ->
+                    selectedServicios = if (selectedServicios.contains(option)) {
+                        selectedServicios - option
+                    } else {
+                        selectedServicios + option
+                    }
+                }
+            )
+
+            MultiFilterSection(
+                title = "Precios",
+                options = listOf(
+                    "Económico", "Gama Media", "Lujo"
+                ),
+                selectedOptions = selectedPrecio,
+                onOptionToggled = { option ->
+                    selectedPrecio = if (selectedPrecio.contains(option)) {
+                        selectedPrecio - option
+                    } else {
+                        selectedPrecio + option
+                    }
+                }
+            )
+
+            MultiFilterSection(
+                title = "Momento del Día",
+                options = listOf(
+                    "Amanecer", "Matutino", "Mediodía", "Vespertino",
+                    "Atardecer", "Nocturno"
+                ),
+                selectedOptions = selectedMomento,
+                onOptionToggled = { option ->
+                    selectedMomento = if (selectedMomento.contains(option)) {
+                        selectedMomento - option
+                    } else {
+                        selectedMomento + option
+                    }
+                }
+            )
+
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    PlaceCard(
+                        lugarId = 1,
+                        title = "Antigua Guatemala",
+                        description = "Ciudad colonial\nrodeada de volcanes.",
+                        imageRes = R.drawable.tikal_prueba,
+                        onClick = { onLugarClick(1) }
+                    )
+                }
+                item {
+                    PlaceCard(
+                        lugarId = 2,
+                        title = "Museo Miraflores",
+                        description = "Museo sobre ruinas\nmayas con artefactos\nantiguos.",
+                        imageRes = R.drawable.tikal_prueba,
+                        onClick = { onLugarClick(2) }
+                    )
+                }
             }
         }
     }
@@ -243,7 +247,7 @@ fun PlaceCard(
         modifier = Modifier
             .width(200.dp)
             .height(240.dp)
-            .clickable(onClick = onClick),
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.outlinedCardColors(
             containerColor = MaterialTheme.colorScheme.surface

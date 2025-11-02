@@ -30,6 +30,7 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,8 +38,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -113,62 +116,62 @@ fun CustomTabs(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailsScreen (
+fun DetailsScreen(
     lugarId: Int = 0,
     onBackClick: () -> Unit = {}
-){
+) {
     var selectedTab by remember { mutableIntStateOf(0) }
     var showReviewDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "DETALLES",
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
+            )
+        },
+        floatingActionButton = {
+            if (selectedTab == 2) {
+                FloatingActionButton(
+                    onClick = { showReviewDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Agregar reseña"
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(8.dp),
+                .padding(innerPadding)
+                .padding(horizontal = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
-        ){
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                Button(
-                    onClick = onBackClick,
-                    colors = ButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary,
-                        containerColor = Color.Transparent,
-                        disabledContentColor = Color.Transparent,
-                        disabledContainerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = null
-                    )
-                }
-
-                Text(
-                    text = "DETALLES",
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.displaySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            HorizontalDivider(
-                modifier = Modifier,
-                thickness = DividerDefaults.Thickness,
-                color = DividerDefaults.color
-            )
-
+        ) {
             Image(
                 painterResource(R.drawable.tikal_prueba),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
                     .padding(horizontal = 16.dp)
                     .clip(shape = RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Fit
@@ -178,7 +181,7 @@ fun DetailsScreen (
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp)
-            ){
+            ) {
                 Text(
                     text = "Tikal, Guatemala",
                     fontWeight = FontWeight.SemiBold,
@@ -186,12 +189,13 @@ fun DetailsScreen (
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ){
+                ) {
                     Icon(
                         imageVector = Icons.Default.Place,
                         contentDescription = null,
@@ -205,12 +209,13 @@ fun DetailsScreen (
                     )
                 }
 
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ){
+                ) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
                         contentDescription = null,
@@ -228,27 +233,12 @@ fun DetailsScreen (
             CustomTabs(
                 selectedTab = selectedTab,
                 onTabSelected = { selectedTab = it }
+            )
 
-            ); when (selectedTab) {
-            0 -> DescriptionContent()
-            1 -> MapContent()
-            2 -> RatingsContent()
-        }
-        }
-
-        if (selectedTab == 2) {
-            FloatingActionButton(
-                onClick = { showReviewDialog = true },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(24.dp),
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Agregar reseña"
-                )
+            when (selectedTab) {
+                0 -> DescriptionContent()
+                1 -> MapContent()
+                2 -> RatingsContent()
             }
         }
     }

@@ -346,102 +346,106 @@ fun HomeScreen(
             }
         },
         content = {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = "HOGAR",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        },
+                        actions = {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                    .clickable {
+                                        scope.launch {
+                                            drawerState.open()
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "Perfil",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                    )
+                },
+                floatingActionButton = {
+                    FloatingMenuButton(
+                        onNuevoViaje = onNuevoViajeClick,
+                        onCalendario = {}
+                    )
+                }
+            ) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(
-                        text = "HOGAR",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 32.sp
+                    TextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Buscar",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        placeholder = {
+                            Text(
+                                text = "Buscar",
+                                color = Color.Gray,
+                                fontSize = 16.sp
+                            )
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(24.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFFE6F4F1),
+                            unfocusedContainerColor = Color(0xFFE6F4F1),
+                            disabledContainerColor = Color(0xFFE6F4F1),
+                            cursorColor = MaterialTheme.colorScheme.primary,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
                     )
 
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                            .clickable { scope.launch {
-                                drawerState.open()
-                            } },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Perfil",
-                            tint = MaterialTheme.colorScheme.primary
+                    Text(
+                        text = "Lugares Populares",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+
+                    CustomTabs(
+                        selectedTab = selectedTab,
+                        onTabSelected = { selectedTab = it }
+                    )
+
+                    when (selectedTab) {
+                        0 -> ListaContent(
+                            lugares = lugares,
+                            onLugarClick = onLugarClick
                         )
+                        1 -> MapContent()
                     }
                 }
-
-                TextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Buscar",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    placeholder = {
-                        Text(
-                            text = "Buscar",
-                            color = Color.Gray,
-                            fontSize = 16.sp
-                        )
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(24.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFE6F4F1),
-                        unfocusedContainerColor = Color(0xFFE6F4F1),
-                        disabledContainerColor = Color(0xFFE6F4F1),
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                )
-
-
-                Text(
-                    text = "Lugares Populares",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-
-                CustomTabs(
-                    selectedTab = selectedTab,
-                    onTabSelected = { selectedTab = it }
-                )
-
-                when (selectedTab) {
-                    0 -> ListaContent(
-                        lugares = lugares,
-                        onLugarClick = onLugarClick
-                    )
-                    1 -> MapContent()
-                }
             }
-            FloatingMenuButton(
-                onNuevoViaje = onNuevoViajeClick,
-                onCalendario = {}
-            )
         }
     )
 }
