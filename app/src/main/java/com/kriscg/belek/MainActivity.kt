@@ -24,6 +24,7 @@ import com.kriscg.belek.ui.navigation.yourTrip.yourTripNavigation
 import com.kriscg.belek.ui.navigation.details.detailsNavigation
 import com.kriscg.belek.ui.navigation.profile.profileNavigation
 import com.kriscg.belek.ui.navigation.config.configNavigation
+import com.kriscg.belek.ui.navigation.login.Login
 import com.kriscg.belek.ui.navigation.profile.editProfileNavigation
 
 class MainActivity : ComponentActivity() {
@@ -69,8 +70,14 @@ fun AppNavigation() {
             },
             onToConfig = {
                 navController.navigate(Config)
+            },
+            onLogout = {
+                navController.navigate(Login) {
+                    popUpTo(Home) { inclusive = true }
+            }
             }
         )
+
 
         encuestaNavigation(
             onNavigateToYourTrip = {

@@ -12,7 +12,8 @@ fun NavGraphBuilder.homeNavigation(
     onNavigateToEncuesta: () -> Unit,
     onNavigateToDetails: (Int) -> Unit,
     onNavigateToProfile: () -> Unit,
-    onToConfig: () -> Unit
+    onToConfig: () -> Unit,
+    onLogout: () -> Unit
 ) {
     composable<Home> {
         HomeScreen(
@@ -21,8 +22,8 @@ fun NavGraphBuilder.homeNavigation(
             onMenuItemClick = { menuItem ->
                 when (menuItem) {
                     "Ver perfil" -> onNavigateToProfile()
-                    "Configuración y privacidad" -> {}
-                    "Cerrar Sesión" -> onToConfig()
+                    "Configuración y privacidad" -> onToConfig()
+                    "Cerrar Sesión" -> onLogout()
                     "Historial" -> {}
                 }
             }
