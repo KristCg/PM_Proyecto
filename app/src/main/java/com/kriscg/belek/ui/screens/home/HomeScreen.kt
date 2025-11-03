@@ -12,12 +12,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -34,17 +32,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kriscg.belek.R
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import com.kriscg.belek.ui.theme.BelekTheme
 import kotlinx.coroutines.launch
-
-data class Lugar(
-    val id: Int,
-    val nombre: String,
-    val descripcion: String,
-    val imageRes: Int
-)
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kriscg.belek.ui.viewModel.HomeViewModel
+import com.kriscg.belek.ui.viewModel.LugarUI
+import coil.compose.AsyncImage
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun FloatingMenuButton(
@@ -52,11 +50,6 @@ fun FloatingMenuButton(
     onCalendario: () -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
-
-    val fabColor = Color(0xFFD32F2F)
-    val pillBg = Color(0xFFFFE4E6)
-    val pillBorder = Color(0xFFF3B4B8)
-    val pillContent = Color(0xFF8A1C24)
 
     Box(
         modifier = Modifier
@@ -75,9 +68,6 @@ fun FloatingMenuButton(
                 ) {
                     MenuPill(
                         text = "Nuevo Viaje",
-                        pillBg = pillBg,
-                        pillBorder = pillBorder,
-                        contentColor = pillContent,
                         icon = Icons.Default.Add
                     ) {
                         expanded = false
@@ -86,9 +76,6 @@ fun FloatingMenuButton(
 
                     MenuPill(
                         text = "Calendario",
-                        pillBg = pillBg,
-                        pillBorder = pillBorder,
-                        contentColor = pillContent,
                         icon = Icons.Default.DateRange
                     ) {
                         expanded = false
@@ -99,8 +86,8 @@ fun FloatingMenuButton(
 
             FloatingActionButton(
                 onClick = { expanded = !expanded },
-                containerColor = fabColor,
-                contentColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape
             ) {
                 val icon = if (expanded) Icons.Default.Close else Icons.Default.Add
@@ -113,9 +100,9 @@ fun FloatingMenuButton(
 @Composable
 private fun MenuPill(
     text: String,
-    pillBg: Color,
-    pillBorder: Color,
-    contentColor: Color,
+    pillBg: Color = MaterialTheme.colorScheme.surface,
+    pillBorder: Color = MaterialTheme.colorScheme.outline,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
     icon: ImageVector,
     onClick: () -> Unit
 ) {
@@ -190,23 +177,38 @@ fun CustomTabs(
 
 @Composable
 fun ListaContent(
-    lugares: List<Lugar>,
+    lugares: List<LugarUI>,
     onLugarClick: (Int) -> Unit = {}
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(
-            items = lugares,
-            key = { lugar -> lugar.id }
-        ) { lugar ->
-            LugarCard(
-                lugar = lugar,
-                onClick = { onLugarClick(lugar.id) }
+    if (lugares.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No se encontraron lugares",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(
+                items = lugares,
+                key = { lugar -> lugar.id }
+            ) { lugar ->
+                LugarCard(
+                    lugar = lugar,
+                    onClick = { onLugarClick(lugar.id) }
+                )
+            }
         }
     }
 }
@@ -276,7 +278,7 @@ fun ProfileDrawerContent(
             "Agregar otra cuenta" to Icons.Default.Add,
             "Historial" to Icons.Default.Menu,
             "Configuración y privacidad" to Icons.Default.Settings,
-            "Cerrar Sesión" to Icons.Default.ExitToApp,
+            "Cerrar Sesión" to Icons.AutoMirrored.Filled.KeyboardArrowLeft,
         )
 
         menuItems.forEachIndexed { index, (title, icon) ->
@@ -315,23 +317,22 @@ fun ProfileDrawerContent(
 @Composable
 fun HomeScreen(
     onNuevoViajeClick: () -> Unit = {},
-    onToProfile: () -> Unit = {},
     onLugarClick: (Int) -> Unit = {},
     onMenuItemClick: (String) -> Unit = {},
-    modifier: Modifier = Modifier
+    viewModel: HomeViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     var query by remember { mutableStateOf("") }
-    var selectedTab by remember { mutableStateOf(0) }
-
-    val lugares = listOf(
-        Lugar(1, "Tikal, Guatemala", "Antigua capital maya entre la selva.", R.drawable.tikal),
-        Lugar(2, "Antigua Guatemala", "Ciudad colonial rodeada de volcanes.", R.drawable.antigua),
-        Lugar(3, "Lago de Atitlán", "El lago más bello del mundo con pueblos llenos de color.", R.drawable.atitlan),
-        Lugar(4, "Semuc Champey", "Piscinas naturales de aguas turquesas en medio de la jungla.", R.drawable.semuc)
-    )
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let { error ->
+            println("Error: $error")
+            viewModel.clearError()
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -395,7 +396,10 @@ fun HomeScreen(
                 ) {
                     TextField(
                         value = query,
-                        onValueChange = { query = it },
+                        onValueChange = {
+                            query = it
+                            viewModel.onSearchQueryChange(it)
+                        },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,
@@ -433,16 +437,27 @@ fun HomeScreen(
                     )
 
                     CustomTabs(
-                        selectedTab = selectedTab,
-                        onTabSelected = { selectedTab = it }
+                        selectedTab = uiState.selectedTab,
+                        onTabSelected = { viewModel.onTabSelected(it) }
                     )
 
-                    when (selectedTab) {
-                        0 -> ListaContent(
-                            lugares = lugares,
-                            onLugarClick = onLugarClick
-                        )
-                        1 -> MapContent()
+                    if (uiState.isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                        when (uiState.selectedTab) {
+                            0 -> ListaContent(
+                                lugares = uiState.lugares,
+                                onLugarClick = onLugarClick
+                            )
+                            1 -> MapContent()
+                        }
                     }
                 }
             }
@@ -452,12 +467,13 @@ fun HomeScreen(
 
 @Composable
 fun LugarCard(
-    lugar: Lugar,
+    lugar: LugarUI,
     onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(106.dp) // Altura fija para todas las cards
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
             .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(16.dp))
@@ -465,18 +481,47 @@ fun LugarCard(
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(id = lugar.imageRes),
-            contentDescription = lugar.nombre,
-            modifier = Modifier
-                .size(90.dp)
-                .clip(RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Crop
-        )
+        if (lugar.imageUrl != null) {
+            AsyncImage(
+                model = lugar.imageUrl,
+                contentDescription = lugar.nombre,
+                modifier = Modifier
+                    .size(90.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop,
+                error = painterResource(id = lugar.imageRes)
+            )
+        } else {
+            Image(
+                painter = painterResource(id = lugar.imageRes),
+                contentDescription = lugar.nombre,
+                modifier = Modifier
+                    .size(90.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
+        }
         Spacer(Modifier.width(12.dp))
-        Column {
-            Text(lugar.nombre, fontWeight = FontWeight.Bold)
-            Text(lugar.descripcion, color = Color.Gray, fontSize = 13.sp)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = lugar.nombre,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = lugar.descripcion,
+                color = Color.Gray,
+                fontSize = 13.sp,
+                maxLines = 2,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
         }
     }
 }

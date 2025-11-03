@@ -26,13 +26,10 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,9 +37,9 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +57,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.kriscg.belek.ui.theme.BelekTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kriscg.belek.ui.viewModel.DetailsViewModel
+import androidx.compose.runtime.collectAsState
+import coil.compose.AsyncImage
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 
 @Composable
 fun CustomTabs(
@@ -120,10 +126,20 @@ fun CustomTabs(
 @Composable
 fun DetailsScreen(
     lugarId: Int = 0,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    viewModel: DetailsViewModel = viewModel()
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
-    var showReviewDialog by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(lugarId) {
+        viewModel.loadLugarDetails(lugarId)
+    }
+
+    LaunchedEffect(uiState.reviewSubmitted) {
+        if (uiState.reviewSubmitted) {
+            viewModel.hideReviewDialog()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -146,9 +162,9 @@ fun DetailsScreen(
             )
         },
         floatingActionButton = {
-            if (selectedTab == 2) {
+            if (uiState.selectedTab == 2) {
                 FloatingActionButton(
-                    onClick = { showReviewDialog = true },
+                    onClick = { viewModel.showReviewDialog() },
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
@@ -160,95 +176,145 @@ fun DetailsScreen(
             }
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Image(
-                painterResource(R.drawable.tikal_prueba),
-                contentDescription = null,
+        if (uiState.isLoading) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .clip(shape = RoundedCornerShape(16.dp)),
-                contentScale = ContentScale.Fit
-            )
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.CircularProgressIndicator()
+            }
+        } else if (uiState.error != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = uiState.error ?: "Error desconocido",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Button(onClick = { viewModel.loadLugarDetails(lugarId) }) {
+                        Text("Reintentar")
+                    }
+                }
+            }
+        } else if (uiState.lugar != null) {
+            val lugar = uiState.lugar!!
 
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp)
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = "Tikal, Guatemala",
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
+                if (lugar.imagenUrl != null) {
+                    AsyncImage(
+                        model = lugar.imagenUrl,
+                        contentDescription = lugar.nombre,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .padding(horizontal = 16.dp)
+                            .clip(shape = RoundedCornerShape(16.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        painterResource(R.drawable.tikal_prueba),
+                        contentDescription = lugar.nombre,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .padding(horizontal = 16.dp)
+                            .clip(shape = RoundedCornerShape(16.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp)
+                ) {
+                    Text(
+                        text = lugar.nombre,
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Place,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+
+                        Text(
+                            text = lugar.ubicacion,
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+
+                    if (lugar.horario != null) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+
+                            Text(
+                                text = lugar.horario,
+                                color = MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    }
+                }
+
+                CustomTabs(
+                    selectedTab = uiState.selectedTab,
+                    onTabSelected = { viewModel.onTabSelected(it) }
                 )
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Place,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                when (uiState.selectedTab) {
+                    0 -> DescriptionContent(
+                        descripcion = lugar.descripcion,
+                        precio = lugar.precio
                     )
-
-                    Text(
-                        text = "Parque Nacional Tikal, Departamento de Petén, Guatemala.",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    1 -> MapContent()
+                    2 -> RatingsContent(resenas = uiState.resenas)
                 }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-
-                    Text(
-                        text = "De 6:00 a.m. a 5:00 p.m",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-            }
-
-            CustomTabs(
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it }
-            )
-
-            when (selectedTab) {
-                0 -> DescriptionContent()
-                1 -> MapContent()
-                2 -> RatingsContent()
             }
         }
     }
 
-    if (showReviewDialog) {
+    if (uiState.showReviewDialog) {
         AddReviewDialog(
-            onDismiss = { showReviewDialog = false },
+            onDismiss = { viewModel.hideReviewDialog() },
             onSubmit = { rating, comment ->
-                showReviewDialog = false
-            }
+                viewModel.submitReview(rating, comment)
+            },
+            isSubmitting = uiState.isSubmittingReview
         )
     }
 }
@@ -256,7 +322,8 @@ fun DetailsScreen(
 @Composable
 fun AddReviewDialog(
     onDismiss: () -> Unit,
-    onSubmit: (Int, String) -> Unit
+    onSubmit: (Int, String) -> Unit,
+    isSubmitting: Boolean = false
 ) {
     var rating by remember { mutableIntStateOf(0) }
     var comment by remember { mutableStateOf("") }
@@ -305,14 +372,14 @@ fun AddReviewDialog(
                         }
 
                         Text(
-                            text = "María Aguilar",
+                            text = "Tu reseña",
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
-                    IconButton(onClick = onDismiss) {
+                    IconButton(onClick = onDismiss, enabled = !isSubmitting) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Cerrar",
@@ -328,8 +395,9 @@ fun AddReviewDialog(
                         .fillMaxWidth()
                         .height(150.dp),
                     label = { Text("Comentario") },
-                    placeholder = { Text("Cuéntanos que te pareció el lugar") },
+                    placeholder = { Text("Cuéntanos qué te pareció el lugar") },
                     shape = RoundedCornerShape(12.dp),
+                    enabled = !isSubmitting,
                     colors = androidx.compose.material3.TextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -344,7 +412,7 @@ fun AddReviewDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Dejanos tu calificación",
+                        text = "Déjanos tu calificación",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -364,21 +432,31 @@ fun AddReviewDialog(
                                 },
                                 modifier = Modifier
                                     .size(32.dp)
-                                    .clickable { rating = index + 1 }
+                                    .clickable(enabled = !isSubmitting) {
+                                        rating = index + 1
+                                    }
                             )
                         }
                     }
                 }
 
-                TextButton(
+                Button(
                     onClick = {
                         if (rating > 0 && comment.isNotEmpty()) {
-                             onSubmit(rating, comment)
-                         }
+                            onSubmit(rating, comment)
+                        }
                     },
-                    modifier = Modifier.align(Alignment.End)
+                    modifier = Modifier.align(Alignment.End),
+                    enabled = !isSubmitting && rating > 0 && comment.isNotEmpty()
                 ) {
-                     Text("Enviar")
+                    if (isSubmitting) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text("Enviar")
+                    }
                 }
             }
         }
@@ -386,58 +464,55 @@ fun AddReviewDialog(
 }
 
 @Composable
-fun DescriptionContent() {
+fun DescriptionContent(
+    descripcion: String,
+    precio: String?
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 32.dp)
-    ){
+    ) {
         Text(
-            text = "Acerca de Tikal",
+            text = "Descripción",
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.titleSmall
         )
         Text(
-            text = "Tikal es una antigua ciudadela maya en los bosques " +
-                    "tropicales del norte de Guatemala. Se cree que data" +
-                    " del siglo I d.C. Tikal floreció entre los años" +
-                    " 200 y 850 d.C. y luego fue abandonada. Sus ruinas" +
-                    " icónicas de templos y palacios incluyen la gigante " +
-                    "pirámide ceremonial Mundo Perdido y el Templo del Gran" +
-                    " Jaguar. A 70 metros, el Templo IV es la estructura " +
-                    "precolombina más alta de América y tiene vista panorámica.",
+            text = descripcion,
             fontWeight = FontWeight.Normal,
             color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.labelMedium
         )
-        Text(
-            text = "Precios",
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.titleSmall
-        )
-        Text(
-            text = "Entrada para extranjeros: Q150\n" +
-                    "Entrada para centroamericanos: Q75.\n" +
-                    "Guatemaltecos: Q25.\n" +
-                    "Tour de Amanecer: Precio adicional de Q100 \n" +
-                    "Guía certificado: Desde Q200 por grupo para un tour de 3-4 horas.",
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelMedium
-        )
+
+        if (precio != null) {
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Precios",
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleSmall
+            )
+            Text(
+                text = precio,
+                fontWeight = FontWeight.Normal,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
     }
 }
 
 @Composable
 fun MapContent() {
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(horizontal = 16.dp),
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         Image(
             painterResource(R.drawable.tikal_mapa),
             contentDescription = null,
@@ -450,151 +525,99 @@ fun MapContent() {
 }
 
 @Composable
-fun RatingsContent() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.outlinedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+fun RatingsContent(
+    resenas: List<com.kriscg.belek.data.models.Resena>
+) {
+    if (resenas.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                    Column {
-                        Text(
-                            text = "María Aguilar",
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "12/09/2025",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    repeat(4) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        tint = Color.LightGray,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                Text(
-                    text = "Es un lugar muy bonito y organizado, recomiendo estar bien hidratado, llevar repelente, bloqueador solar y un sombrero, hace demasiado calor, estuvimos a 42°C pero vale la pena, es hermoso.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+            Text(
+                text = "No hay reseñas aún",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
-
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.outlinedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(
+            items(resenas) { resena ->
+                OutlinedCard(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    colors = CardDefaults.outlinedCardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
                 ) {
-
-                    Box(
+                    Column(
                         modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                            Column {
+                                Text(
+                                    text = "Usuario ${resena.usuarioId.take(8)}",
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = resena.createdAt?.let {
+                                        formatDate(it)
+                                    } ?: "Fecha desconocida",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
 
-                    Column {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            repeat(5) { index ->
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = if (index < resena.calificacion) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        Color.LightGray
+                                    },
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+
                         Text(
-                            text = "Antonio Zabaleta",
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.bodyLarge,
+                            text = resena.comentario,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "12/09/2025",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    repeat(2) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    repeat(3) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = Color.LightGray,
-                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -603,9 +626,20 @@ fun RatingsContent() {
     }
 }
 
+private fun formatDate(dateString: String): String {
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val date = inputFormat.parse(dateString)
+        outputFormat.format(date ?: Date())
+    } catch (e: Exception) {
+        dateString
+    }
+}
+
 @Preview
 @Composable
-fun PreviewDetailsScreen(){
+fun PreviewDetailsScreen() {
     BelekTheme {
         DetailsScreen()
     }

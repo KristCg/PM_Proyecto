@@ -3,14 +3,21 @@ package com.kriscg.belek.ui.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kriscg.belek.data.repository.LugaresRepository
-import com.kriscg.belek.ui.screens.home.Lugar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+data class LugarUI(
+    val id: Int,
+    val nombre: String,
+    val descripcion: String,
+    val imageRes: Int,
+    val imageUrl: String? = null
+)
+
 data class HomeUiState(
-    val lugares: List<Lugar> = emptyList(),
+    val lugares: List<LugarUI> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val searchQuery: String = "",
@@ -35,11 +42,12 @@ class HomeViewModel(
             repository.getAllLugares()
                 .onSuccess { lugaresDB ->
                     val lugares = lugaresDB.map { lugar ->
-                        Lugar(
+                        LugarUI(
                             id = lugar.id ?: 0,
                             nombre = lugar.nombre,
                             descripcion = lugar.descripcion,
-                            imageRes = getImageResourceForPlace(lugar.nombre)
+                            imageRes = getImageResourceForPlace(lugar.nombre),
+                            imageUrl = lugar.imagenUrl // Incluir URL de Supabase
                         )
                     }
 
@@ -74,11 +82,12 @@ class HomeViewModel(
             repository.searchLugares(query)
                 .onSuccess { lugaresDB ->
                     val lugares = lugaresDB.map { lugar ->
-                        Lugar(
+                        LugarUI(
                             id = lugar.id ?: 0,
                             nombre = lugar.nombre,
                             descripcion = lugar.descripcion,
-                            imageRes = getImageResourceForPlace(lugar.nombre)
+                            imageRes = getImageResourceForPlace(lugar.nombre),
+                            imageUrl = lugar.imagenUrl
                         )
                     }
 
@@ -110,7 +119,7 @@ class HomeViewModel(
             nombre.contains("Antigua", ignoreCase = true) -> com.kriscg.belek.R.drawable.antigua
             nombre.contains("Atitlán", ignoreCase = true) -> com.kriscg.belek.R.drawable.atitlan
             nombre.contains("Semuc", ignoreCase = true) -> com.kriscg.belek.R.drawable.semuc
-            else -> com.kriscg.belek.R.drawable.tikal // default
+            else -> com.kriscg.belek.R.drawable.tikal_prueba
         }
     }
 }
