@@ -2,7 +2,7 @@ package com.kriscg.belek.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kriscg.belek.data.models.Viaje
+import com.kriscg.belek.domain.Viaje
 import com.kriscg.belek.data.repository.AuthRepository
 import com.kriscg.belek.data.repository.ViajesRepository
 import kotlinx.coroutines.flow.MutableStateFlow

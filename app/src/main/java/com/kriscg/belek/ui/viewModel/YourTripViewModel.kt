@@ -2,7 +2,7 @@ package com.kriscg.belek.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kriscg.belek.data.models.Lugar
+import com.kriscg.belek.domain.Lugar
 import com.kriscg.belek.data.repository.LugaresRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

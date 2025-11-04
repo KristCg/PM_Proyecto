@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Person
@@ -67,6 +66,7 @@ import java.util.Locale
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Draw
+import com.kriscg.belek.domain.Resena
 
 @Composable
 fun CustomTabs(
@@ -528,7 +528,7 @@ fun MapContent() {
 
 @Composable
 fun RatingsContent(
-    resenas: List<com.kriscg.belek.data.models.Resena>
+    resenas: List<Resena>
 ) {
     if (resenas.isEmpty()) {
         Box(

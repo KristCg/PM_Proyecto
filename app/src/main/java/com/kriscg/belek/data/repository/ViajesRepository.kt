@@ -1,7 +1,7 @@
 package com.kriscg.belek.data.repository
 
 import com.kriscg.belek.data.SupabaseConfig
-import com.kriscg.belek.data.models.Viaje
+import com.kriscg.belek.domain.Viaje
 import io.github.jan.supabase.postgrest.from
 
 class ViajesRepository {

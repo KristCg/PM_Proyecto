@@ -3,6 +3,7 @@ package com.kriscg.belek.ui.screens.yourTrip
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,33 +30,32 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.kriscg.belek.R
 import com.kriscg.belek.ui.theme.BelekTheme
+import com.kriscg.belek.ui.viewModel.YourTripViewModel
+import com.kriscg.belek.domain.Lugar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TuViajeScreen(
     onBackClick: () -> Unit = {},
     onLugarClick: (Int) -> Unit = {},
-    modifier: Modifier = Modifier
+    viewModel: YourTripViewModel = viewModel()
 ) {
-    var selectedTipoLugar by remember { mutableStateOf(setOf("Naturales", "Históricos")) }
-    var selectedAmbiente by remember { mutableStateOf(setOf("Románticos", "Familiares")) }
-    var selectedServicios by remember { mutableStateOf(setOf("Estacionamiento", "Wifi", "Petfriendly")) }
-    var selectedPrecio by remember { mutableStateOf(setOf("Gama Media", "Económico")) }
-    var selectedMomento by remember { mutableStateOf(setOf("Matutino", "Mediodía")) }
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -90,14 +91,8 @@ fun TuViajeScreen(
                     "Arqueológicos", "Naturales", "Históricos", "Culturales",
                     "Ecoturísticos", "Gastronómicos", "Recreativos", "Comerciales"
                 ),
-                selectedOptions = selectedTipoLugar,
-                onOptionToggled = { option ->
-                    selectedTipoLugar = if (selectedTipoLugar.contains(option)) {
-                        selectedTipoLugar - option
-                    } else {
-                        selectedTipoLugar + option
-                    }
-                }
+                selectedOptions = uiState.tiposSeleccionados,
+                onOptionToggled = { viewModel.onTipoToggled(it) }
             )
 
             MultiFilterSection(
@@ -106,14 +101,8 @@ fun TuViajeScreen(
                     "Familiares", "Románticos", "Aventura", "Cultural",
                     "Nocturnos", "Espiritual"
                 ),
-                selectedOptions = selectedAmbiente,
-                onOptionToggled = { option ->
-                    selectedAmbiente = if (selectedAmbiente.contains(option)) {
-                        selectedAmbiente - option
-                    } else {
-                        selectedAmbiente + option
-                    }
-                }
+                selectedOptions = uiState.ambientesSeleccionados,
+                onOptionToggled = { viewModel.onAmbienteToggled(it) }
             )
 
             MultiFilterSection(
@@ -122,14 +111,8 @@ fun TuViajeScreen(
                     "Estacionamiento", "Wifi", "Petfriendly", "Accesible",
                     "Transporte Incluido", "Tours Incluidos"
                 ),
-                selectedOptions = selectedServicios,
-                onOptionToggled = { option ->
-                    selectedServicios = if (selectedServicios.contains(option)) {
-                        selectedServicios - option
-                    } else {
-                        selectedServicios + option
-                    }
-                }
+                selectedOptions = uiState.serviciosSeleccionados,
+                onOptionToggled = { viewModel.onServicioToggled(it) }
             )
 
             MultiFilterSection(
@@ -137,14 +120,8 @@ fun TuViajeScreen(
                 options = listOf(
                     "Económico", "Gama Media", "Lujo"
                 ),
-                selectedOptions = selectedPrecio,
-                onOptionToggled = { option ->
-                    selectedPrecio = if (selectedPrecio.contains(option)) {
-                        selectedPrecio - option
-                    } else {
-                        selectedPrecio + option
-                    }
-                }
+                selectedOptions = uiState.preciosSeleccionados,
+                onOptionToggled = { viewModel.onPrecioToggled(it) }
             )
 
             MultiFilterSection(
@@ -153,37 +130,58 @@ fun TuViajeScreen(
                     "Amanecer", "Matutino", "Mediodía", "Vespertino",
                     "Atardecer", "Nocturno"
                 ),
-                selectedOptions = selectedMomento,
-                onOptionToggled = { option ->
-                    selectedMomento = if (selectedMomento.contains(option)) {
-                        selectedMomento - option
-                    } else {
-                        selectedMomento + option
-                    }
-                }
+                selectedOptions = uiState.momentosSeleccionados,
+                onOptionToggled = { viewModel.onMomentoToggled(it) }
             )
 
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    PlaceCard(
-                        lugarId = 1,
-                        title = "Antigua Guatemala",
-                        description = "Ciudad colonial\nrodeada de volcanes.",
-                        imageRes = R.drawable.tikal_prueba,
-                        onClick = { onLugarClick(1) }
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
-                item {
-                    PlaceCard(
-                        lugarId = 2,
-                        title = "Museo Miraflores",
-                        description = "Museo sobre ruinas\nmayas con artefactos\nantiguos.",
-                        imageRes = R.drawable.tikal_prueba,
-                        onClick = { onLugarClick(2) }
+            } else if (uiState.error != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = uiState.error ?: "Error desconocido",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
                     )
+                }
+            } else if (uiState.lugaresRecomendados.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No se encontraron lugares con los filtros seleccionados",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            } else {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(uiState.lugaresRecomendados) { lugar ->
+                        PlaceCard(
+                            lugar = lugar,
+                            onClick = { onLugarClick(lugar.id ?: 0) }
+                        )
+                    }
                 }
             }
         }
@@ -199,7 +197,7 @@ fun MultiFilterSection(
 ) {
     HorizontalDivider(
         thickness = DividerDefaults.Thickness,
-        color = DividerDefaults.color
+        color = MaterialTheme.colorScheme.outlineVariant
     )
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -237,10 +235,7 @@ fun MultiFilterSection(
 
 @Composable
 fun PlaceCard(
-    lugarId: Int,
-    title: String,
-    description: String,
-    imageRes: Int,
+    lugar: Lugar,
     onClick: () -> Unit = {}
 ) {
     OutlinedCard(
@@ -256,14 +251,27 @@ fun PlaceCard(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            Image(
-                painter = painterResource(imageRes),
-                contentDescription = title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp),
-                contentScale = ContentScale.Crop
-            )
+            if (lugar.imagenUrl != null) {
+                AsyncImage(
+                    model = lugar.imagenUrl,
+                    contentDescription = lugar.nombre,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
+                    contentScale = ContentScale.Crop,
+                    error = painterResource(id = R.drawable.tikal_prueba)
+                )
+            } else {
+                Image(
+                    painter = painterResource(R.drawable.tikal_prueba),
+                    contentDescription = lugar.nombre,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -272,16 +280,18 @@ fun PlaceCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = title,
+                    text = lugar.nombre,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1
                 )
                 Text(
-                    text = description,
+                    text = lugar.descripcion,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 16.sp
+                    lineHeight = 16.sp,
+                    maxLines = 3
                 )
             }
         }

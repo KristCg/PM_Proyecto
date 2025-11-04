@@ -1,7 +1,7 @@
 package com.kriscg.belek.data.repository
 
 import com.kriscg.belek.data.SupabaseConfig
-import com.kriscg.belek.data.models.Usuario
+import com.kriscg.belek.domain.Usuario
 import io.github.jan.supabase.postgrest.from
 
 class UsuariosRepository {

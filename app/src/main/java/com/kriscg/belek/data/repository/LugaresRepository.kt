@@ -1,8 +1,8 @@
 package com.kriscg.belek.data.repository
 
 import com.kriscg.belek.data.SupabaseConfig
-import com.kriscg.belek.data.models.Lugar
-import com.kriscg.belek.data.models.Resena
+import com.kriscg.belek.domain.Lugar
+import com.kriscg.belek.domain.Resena
 import io.github.jan.supabase.postgrest.from
 
 class LugaresRepository {

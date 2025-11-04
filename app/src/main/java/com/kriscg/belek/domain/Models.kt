@@ -1,4 +1,4 @@
-package com.kriscg.belek.data.models
+package com.kriscg.belek.domain
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -28,7 +28,13 @@ data class Lugar(
     @SerialName("imagen_url")
     val imagenUrl: String? = null,
     @SerialName("created_at")
-    val createdAt: String? = null
+    val createdAt: String? = null,
+    @SerialName("momento_dia")
+    val momentoDia: String? = null,
+    @SerialName("rango_precios")
+    val rangoPrecio: String? = null,
+    val coordenadas: String? = null,
+    val departamento: String? = null
 )
 
 @Serializable
