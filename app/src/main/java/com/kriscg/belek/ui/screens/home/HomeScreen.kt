@@ -100,19 +100,20 @@ fun FloatingMenuButton(
 @Composable
 private fun MenuPill(
     text: String,
-    pillBg: Color = MaterialTheme.colorScheme.surface,
-    pillBorder: Color = MaterialTheme.colorScheme.outline,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
     icon: ImageVector,
     onClick: () -> Unit
 ) {
     Surface(
-        color = pillBg,
-        contentColor = contentColor,
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         shape = RoundedCornerShape(24.dp),
         shadowElevation = 6.dp,
         modifier = Modifier
-            .border(1.dp, pillBorder, RoundedCornerShape(24.dp))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(24.dp)
+            )
             .clip(RoundedCornerShape(24.dp))
             .clickable { onClick() }
     ) {
@@ -120,9 +121,17 @@ private fun MenuPill(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
-            Icon(icon, contentDescription = null)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
             Spacer(Modifier.width(10.dp))
-            Text(text, fontWeight = FontWeight.SemiBold)
+            Text(
+                text = text,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
@@ -154,7 +163,7 @@ fun CustomTabs(
                         color = if (index == selectedTab)
                             MaterialTheme.colorScheme.secondaryContainer
                         else
-                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.surface,
                         shape = when (index) {
                             0 -> RoundedCornerShape(topStart = 26.dp, bottomStart = 26.dp)
                             tabs.size - 1 -> RoundedCornerShape(topEnd = 26.dp, bottomEnd = 26.dp)
@@ -168,7 +177,10 @@ fun CustomTabs(
                     text = title,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = if (index == selectedTab)
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -219,7 +231,7 @@ fun MapContent() {
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
-            .background(Color(0xFFECECEC)),
+            .background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -261,12 +273,12 @@ fun ProfileDrawerContent(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Usuario",
                     modifier = Modifier.size(64.dp),
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Nombre de Usuario",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -285,7 +297,8 @@ fun ProfileDrawerContent(
             if (index == 2 || index == 4) {
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 8.dp),
-                    thickness = 0.5.dp
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant
                 )
             }
 
@@ -373,7 +386,7 @@ fun HomeScreen(
                                 Icon(
                                     imageVector = Icons.Default.Person,
                                     contentDescription = "Perfil",
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
@@ -404,22 +417,22 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Buscar",
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
                         placeholder = {
                             Text(
                                 text = "Buscar",
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 16.sp
                             )
                         },
                         singleLine = true,
                         shape = RoundedCornerShape(24.dp),
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFE6F4F1),
-                            unfocusedContainerColor = Color(0xFFE6F4F1),
-                            disabledContainerColor = Color(0xFFE6F4F1),
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                             cursorColor = MaterialTheme.colorScheme.primary,
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent
@@ -433,7 +446,8 @@ fun HomeScreen(
                     Text(
                         text = "Lugares Populares",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     CustomTabs(
@@ -448,7 +462,9 @@ fun HomeScreen(
                                 .padding(32.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
                     } else {
                         when (uiState.selectedTab) {
@@ -473,10 +489,14 @@ fun LugarCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(106.dp) // Altura fija para todas las cards
+            .height(106.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White)
-            .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = RoundedCornerShape(16.dp)
+            )
             .clickable { onClick() }
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -512,12 +532,13 @@ fun LugarCard(
                 text = lugar.nombre,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = lugar.descripcion,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 maxLines = 2,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis

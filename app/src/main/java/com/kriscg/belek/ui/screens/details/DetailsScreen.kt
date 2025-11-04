@@ -66,6 +66,7 @@ import java.util.Date
 import java.util.Locale
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Draw
 
 @Composable
 fun CustomTabs(
@@ -166,10 +167,11 @@ fun DetailsScreen(
                 FloatingActionButton(
                     onClick = { viewModel.showReviewDialog() },
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    shape = CircleShape
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        imageVector = Icons.Default.Draw,
                         contentDescription = "Agregar reseña"
                     )
                 }
