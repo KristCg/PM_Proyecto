@@ -34,7 +34,9 @@ data class Lugar(
     @SerialName("rango_precios")
     val rangoPrecio: String? = null,
     val coordenadas: String? = null,
-    val departamento: String? = null
+    val departamento: String? = null,
+    val latitud: Double? = null,
+    val longitud: Double? = null
 )
 
 @Serializable

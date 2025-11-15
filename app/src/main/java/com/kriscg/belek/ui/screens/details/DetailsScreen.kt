@@ -66,6 +66,14 @@ import java.util.Locale
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Draw
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
+import com.kriscg.belek.domain.Lugar
 import com.kriscg.belek.domain.Resena
 
 @Composable
@@ -303,7 +311,7 @@ fun DetailsScreen(
                         descripcion = lugar.descripcion,
                         precio = lugar.precio
                     )
-                    1 -> MapContent()
+                    1 -> MapContent(lugar = lugar)
                     2 -> RatingsContent(resenas = uiState.resenas)
                 }
             }
@@ -507,24 +515,63 @@ fun DescriptionContent(
 }
 
 @Composable
-fun MapContent() {
-    Column(
+fun MapContent(lugar: Lugar) {
+    val defaultLocation = LatLng(14.6349, -90.5069)
+
+    val location = remember(lugar.latitud, lugar.longitud) {
+        val lat = lugar.latitud
+        val long = lugar.longitud
+        if (lat != null && long != null){
+            LatLng(lat, long)
+        } else {
+            defaultLocation
+        }
+
+    }
+
+    val cameraPositionState = rememberCameraPositionState{
+        position = CameraPosition.fromLatLngZoom(location, 14f)
+    }
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 16.dp)
     ) {
-        Image(
-            painterResource(R.drawable.tikal_mapa),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(shape = RoundedCornerShape(16.dp)),
-            contentScale = ContentScale.Crop
+        GoogleMapView(
+            modifier = Modifier.matchParentSize(),
+            cameraPositionState = cameraPositionState,
+            markerPosition = location,
+            markerTitle = lugar.nombre
         )
     }
 }
+
+
+
+@Composable
+fun GoogleMapView(
+    modifier: Modifier=Modifier,
+    cameraPositionState: CameraPositionState = rememberCameraPositionState(),
+    markerPosition: LatLng? = null,
+    markerTitle: String? = null
+){
+    val markerState = markerPosition?.let {
+        rememberMarkerState(position = it)
+    }
+
+    GoogleMap (
+        modifier = modifier,
+        cameraPositionState = cameraPositionState
+    ){
+        if (markerState  != null) {
+            Marker(
+                state = markerState,
+                title = markerTitle
+            )
+        }
+    }
+}
+
 
 @Composable
 fun RatingsContent(
