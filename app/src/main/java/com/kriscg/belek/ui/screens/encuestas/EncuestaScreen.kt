@@ -15,7 +15,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kriscg.belek.R
 import com.kriscg.belek.ui.viewModel.EncuestaViewModel
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 val tipos = listOf(
     "Arqueológicos",
@@ -58,13 +60,21 @@ val tipos = listOf(
 )
 
 val presupuesto = listOf("Alto", "Mediano", "Bajo")
-val intereses = listOf("Gastronomía", "Fotografía", "Artesanías y compras", "Aventura", "Relajación")
+
+val ambientes = listOf(
+    "Familiares",
+    "Románticos",
+    "Aventura",
+    "Cultural",
+    "Nocturnos",
+    "Espiritual"
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncuestaScreen(
     modifier: Modifier = Modifier,
-    onVerOpcionesClick: () -> Unit = {},
+    onVerOpcionesClick: (tipo: String?, presupuesto: String?, ambientes: String?) -> Unit = { _, _, _ -> },
     onBackClick: () -> Unit = {},
     viewModel: EncuestaViewModel = viewModel()
 ) {
@@ -72,7 +82,19 @@ fun EncuestaScreen(
 
     LaunchedEffect(uiState.viajeCreado) {
         if (uiState.viajeCreado) {
-            onVerOpcionesClick()
+            val ambientesJson = if (uiState.ambientesSeleccionados.isNotEmpty()) {
+                val json = Json.encodeToString(uiState.ambientesSeleccionados.toList())
+                println("DEBUG Encuesta: Ambientes seleccionados: ${uiState.ambientesSeleccionados}")
+                println("DEBUG Encuesta: JSON generado: $json")
+                json
+            } else {
+                println("DEBUG Encuesta: No hay ambientes seleccionados")
+                null
+            }
+
+            println("DEBUG Encuesta: Navegando con - Tipo: ${uiState.tipoSeleccionado}, Presupuesto: ${uiState.presupuestoSeleccionado}, Ambientes: $ambientesJson")
+
+            onVerOpcionesClick(uiState.tipoSeleccionado, uiState.presupuestoSeleccionado, ambientesJson)
             viewModel.resetState()
         }
     }
@@ -90,7 +112,7 @@ fun EncuestaScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.Default.ChevronLeft,
                             contentDescription = "Regresar"
                         )
                     }
@@ -110,6 +132,7 @@ fun EncuestaScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.Top,
             ) {
+                // Mostrar error si existe
                 if (uiState.error != null) {
                     Card(
                         modifier = Modifier
@@ -211,7 +234,7 @@ fun EncuestaScreen(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    text = "Intereses específicos:",
+                    text = "Ambiente deseado:",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -221,11 +244,11 @@ fun EncuestaScreen(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(intereses) { interes ->
+                    items(ambientes) { ambiente ->
                         FiltroBoton(
-                            texto = interes,
-                            seleccionado = uiState.interesesSeleccionados.contains(interes),
-                            onClick = { viewModel.onInteresToggled(interes) },
+                            texto = ambiente,
+                            seleccionado = uiState.ambientesSeleccionados.contains(ambiente),
+                            onClick = { viewModel.onAmbienteToggled(ambiente) },
                             enabled = !uiState.isLoading
                         )
                     }

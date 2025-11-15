@@ -90,8 +90,14 @@ fun AppNavigation() {
         )
 
         encuestaNavigation(
-            onNavigateToYourTrip = {
-                navController.navigate(YourTrip) {
+            onNavigateToYourTrip = { tipo, presupuesto, ambientes ->
+                navController.navigate(
+                    YourTrip(
+                        tipo = tipo,
+                        presupuesto = presupuesto,
+                        ambientes = ambientes
+                    )
+                ) {
                     launchSingleTop = true
                 }
             },
@@ -133,6 +139,7 @@ fun AppNavigation() {
                 navController.navigateUp()
             }
         )
+
         editProfileNavigation(
             onNavigateBack = {
                 navController.navigateUp()

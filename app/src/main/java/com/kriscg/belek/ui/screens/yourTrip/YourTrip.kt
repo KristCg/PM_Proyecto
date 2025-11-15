@@ -1,5 +1,6 @@
 package com.kriscg.belek.ui.screens.yourTrip
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -48,14 +50,54 @@ import com.kriscg.belek.ui.theme.BelekTheme
 import com.kriscg.belek.ui.viewModel.YourTripViewModel
 import com.kriscg.belek.domain.Lugar
 
+private const val TAG = "TuViajeScreen"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TuViajeScreen(
+    tipo: String? = null,
+    presupuesto: String? = null,
+    ambientesJson: String? = null,
     onBackClick: () -> Unit = {},
     onLugarClick: (Int) -> Unit = {},
+    modifier: Modifier = Modifier,
     viewModel: YourTripViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        Log.d(TAG, "========================================")
+        Log.d(TAG, "INICIANDO TuViajeScreen")
+        Log.d(TAG, "Tipo recibido: $tipo")
+        Log.d(TAG, "Presupuesto recibido: $presupuesto")
+        Log.d(TAG, "AmbientesJson recibido: $ambientesJson")
+        Log.d(TAG, "========================================")
+
+        if (tipo != null || presupuesto != null || ambientesJson != null) {
+            val ambientes = if (!ambientesJson.isNullOrBlank()) {
+                try {
+                    Log.d(TAG, "Intentando deserializar JSON: $ambientesJson")
+                    val decoded = kotlinx.serialization.json.Json.decodeFromString<List<String>>(ambientesJson)
+                    Log.d(TAG, "✅ Deserialización exitosa: $decoded")
+                    decoded.toSet()
+                } catch (e: Exception) {
+                    Log.e(TAG, "❌ ERROR al deserializar: ${e.message}")
+                    emptySet()
+                }
+            } else {
+                Log.d(TAG, "AmbientesJson vacío o null")
+                emptySet()
+            }
+
+            Log.d(TAG, "Ambientes finales: $ambientes")
+            Log.d(TAG, "Llamando a initializeFromEncuesta...")
+            viewModel.initializeFromEncuesta(tipo, presupuesto, ambientes)
+        }
+    }
+
+    LaunchedEffect(uiState.ambientesSeleccionados) {
+        Log.d(TAG, "Estado actualizado - Ambientes seleccionados: ${uiState.ambientesSeleccionados}")
+    }
 
     Scaffold(
         topBar = {
@@ -102,7 +144,11 @@ fun TuViajeScreen(
                     "Nocturnos", "Espiritual"
                 ),
                 selectedOptions = uiState.ambientesSeleccionados,
-                onOptionToggled = { viewModel.onAmbienteToggled(it) }
+                onOptionToggled = {
+                    Log.d(TAG, "Toggle ambiente clickeado: $it")
+                    Log.d(TAG, "Estado actual: ${uiState.ambientesSeleccionados}")
+                    viewModel.onAmbienteToggled(it)
+                }
             )
 
             MultiFilterSection(
@@ -208,12 +254,23 @@ fun MultiFilterSection(
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onBackground
         )
+
+        if (title == "Ambiente") {
+            Log.d(TAG, "Renderizando $title - Seleccionados: $selectedOptions")
+        }
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(options) { option ->
+                val isSelected = selectedOptions.contains(option)
+
+                if (title == "Ambiente") {
+                    Log.d(TAG, "Chip '$option' - isSelected: $isSelected")
+                }
+
                 FilterChip(
-                    selected = selectedOptions.contains(option),
+                    selected = isSelected,
                     onClick = { onOptionToggled(option) },
                     label = {
                         Text(

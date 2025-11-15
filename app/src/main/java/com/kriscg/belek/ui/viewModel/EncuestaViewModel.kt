@@ -16,7 +16,7 @@ data class EncuestaUiState(
     val destino: String = "",
     val tipoSeleccionado: String = "",
     val presupuestoSeleccionado: String = "",
-    val interesesSeleccionados: Set<String> = emptySet(),
+    val ambientesSeleccionados: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val viajeCreado: Boolean = false
@@ -48,20 +48,19 @@ class EncuestaViewModel(
         )
     }
 
-    fun onInteresToggled(interes: String) {
-        val currentIntereses = _uiState.value.interesesSeleccionados.toMutableSet()
-        if (currentIntereses.contains(interes)) {
-            currentIntereses.remove(interes)
+    fun onAmbienteToggled(ambiente: String) {
+        val currentAmbientes = _uiState.value.ambientesSeleccionados.toMutableSet()
+        if (currentAmbientes.contains(ambiente)) {
+            currentAmbientes.remove(ambiente)
         } else {
-            currentIntereses.add(interes)
+            currentAmbientes.add(ambiente)
         }
-        _uiState.value = _uiState.value.copy(interesesSeleccionados = currentIntereses)
+        _uiState.value = _uiState.value.copy(ambientesSeleccionados = currentAmbientes)
     }
 
     fun guardarViaje() {
         val state = _uiState.value
 
-        // Validaciones
         if (state.destino.isBlank()) {
             _uiState.value = state.copy(error = "Por favor ingresa un destino")
             return
@@ -86,15 +85,14 @@ class EncuestaViewModel(
         viewModelScope.launch {
             _uiState.value = state.copy(isLoading = true, error = null)
 
-            // Convertir intereses a JSON string
-            val interesesJson = Json.encodeToString(state.interesesSeleccionados.toList())
+            val ambientesJson = Json.encodeToString(state.ambientesSeleccionados.toList())
 
             val viaje = Viaje(
                 usuarioId = userId,
                 destino = state.destino,
                 tipo = state.tipoSeleccionado,
                 presupuesto = state.presupuestoSeleccionado,
-                intereses = interesesJson
+                intereses = ambientesJson
             )
 
             viajesRepository.crearViaje(viaje)

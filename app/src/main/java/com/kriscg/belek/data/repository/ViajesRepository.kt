@@ -31,6 +31,23 @@ class ViajesRepository {
         }
     }
 
+    suspend fun getUltimoViajeByUsuario(usuarioId: String): Result<Viaje?> {
+        return try {
+            val viajes = client.from("viajes")
+                .select {
+                    filter {
+                        eq("usuario_id", usuarioId)
+                    }
+                }
+                .decodeList<Viaje>()
+
+            val ultimoViaje = viajes.maxByOrNull { it.createdAt ?: "" }
+            Result.success(ultimoViaje)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getViajeById(id: Int): Result<Viaje> {
         return try {
             val viaje = client.from("viajes")

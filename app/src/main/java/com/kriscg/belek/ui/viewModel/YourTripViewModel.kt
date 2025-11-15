@@ -11,11 +11,11 @@ import kotlinx.coroutines.launch
 
 data class YourTripUiState(
     val lugaresRecomendados: List<Lugar> = emptyList(),
-    val tiposSeleccionados: Set<String> = setOf("Naturales", "Históricos"),
-    val ambientesSeleccionados: Set<String> = setOf("Románticos", "Familiares"),
-    val serviciosSeleccionados: Set<String> = setOf("Estacionamiento", "Wifi", "Petfriendly"),
-    val preciosSeleccionados: Set<String> = setOf("Gama Media", "Económico"),
-    val momentosSeleccionados: Set<String> = setOf("Matutino", "Mediodía"),
+    val tiposSeleccionados: Set<String> = emptySet(),
+    val ambientesSeleccionados: Set<String> = emptySet(),
+    val serviciosSeleccionados: Set<String> = emptySet(),
+    val preciosSeleccionados: Set<String> = emptySet(),
+    val momentosSeleccionados: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -28,6 +28,31 @@ class YourTripViewModel(
     val uiState: StateFlow<YourTripUiState> = _uiState.asStateFlow()
 
     init {
+        loadRecommendations()
+    }
+
+    fun initializeFromEncuesta(tipo: String?, presupuesto: String?, ambientes: Set<String>?) {
+        val tiposSet = if (!tipo.isNullOrBlank()) setOf(tipo) else emptySet()
+
+        val preciosSet = when (presupuesto) {
+            "Bajo" -> setOf("Económico")
+            "Mediano" -> setOf("Gama Media")
+            "Alto" -> setOf("Lujo")
+            else -> emptySet()
+        }
+
+        val ambientesSet = ambientes ?: emptySet()
+
+        println("DEBUG ViewModel: Tipos=$tiposSet, Precios=$preciosSet, Ambientes=$ambientesSet")
+
+        _uiState.value = _uiState.value.copy(
+            tiposSeleccionados = tiposSet,
+            preciosSeleccionados = preciosSet,
+            ambientesSeleccionados = ambientesSet
+        )
+
+        println("DEBUG ViewModel: Estado actualizado - ${_uiState.value.tiposSeleccionados}, ${_uiState.value.preciosSeleccionados}, ${_uiState.value.ambientesSeleccionados}")
+
         loadRecommendations()
     }
 
@@ -92,28 +117,49 @@ class YourTripViewModel(
 
             repository.getAllLugares()
                 .onSuccess { lugares ->
+                    val state = _uiState.value
+
+                    val noFilters = state.tiposSeleccionados.isEmpty() &&
+                            state.ambientesSeleccionados.isEmpty() &&
+                            state.serviciosSeleccionados.isEmpty() &&
+                            state.preciosSeleccionados.isEmpty() &&
+                            state.momentosSeleccionados.isEmpty()
+
+                    if (noFilters) {
+                        _uiState.value = _uiState.value.copy(
+                            lugaresRecomendados = lugares.sortedByDescending { it.calificacion },
+                            isLoading = false
+                        )
+                        return@onSuccess
+                    }
+
                     val filtrados = lugares.filter { lugar ->
-                        val matchTipo = _uiState.value.tiposSeleccionados.isEmpty() ||
-                                _uiState.value.tiposSeleccionados.any {
+                        val matchTipo = state.tiposSeleccionados.isEmpty() ||
+                                state.tiposSeleccionados.any {
                                     lugar.tipo.contains(it, ignoreCase = true)
                                 }
 
-                        val matchAmbiente = _uiState.value.ambientesSeleccionados.isEmpty() ||
-                                _uiState.value.ambientesSeleccionados.any {
+                        val matchAmbiente = state.ambientesSeleccionados.isEmpty() ||
+                                state.ambientesSeleccionados.any {
                                     lugar.ambiente?.contains(it, ignoreCase = true) == true
                                 }
 
-                        val matchServicios = _uiState.value.serviciosSeleccionados.isEmpty() ||
-                                _uiState.value.serviciosSeleccionados.any {
+                        val matchServicios = state.serviciosSeleccionados.isEmpty() ||
+                                state.serviciosSeleccionados.any {
                                     lugar.servicios?.contains(it, ignoreCase = true) == true
                                 }
 
-                        val matchPrecio = _uiState.value.preciosSeleccionados.isEmpty() ||
-                                _uiState.value.preciosSeleccionados.any {
-                                    lugar.precio?.contains(it, ignoreCase = true) == true
+                        val matchPrecio = state.preciosSeleccionados.isEmpty() ||
+                                state.preciosSeleccionados.any { precioSeleccionado ->
+                                    lugar.rangoPrecio?.contains(precioSeleccionado, ignoreCase = true) == true
                                 }
 
-                        matchTipo && matchAmbiente && matchServicios && matchPrecio
+                        val matchMomento = state.momentosSeleccionados.isEmpty() ||
+                                state.momentosSeleccionados.any { momentoSeleccionado ->
+                                    lugar.momentoDia?.contains(momentoSeleccionado, ignoreCase = true) == true
+                                }
+
+                        matchTipo && matchAmbiente && matchServicios && matchPrecio && matchMomento
                     }
 
                     _uiState.value = _uiState.value.copy(

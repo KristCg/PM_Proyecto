@@ -9,7 +9,7 @@ import com.kriscg.belek.ui.screens.encuestas.EncuestaScreen
 object Encuesta
 
 fun NavGraphBuilder.encuestaNavigation(
-    onNavigateToYourTrip: () -> Unit,
+    onNavigateToYourTrip: (tipo: String?, presupuesto: String?, ambientes: String?) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     composable<Encuesta> {
