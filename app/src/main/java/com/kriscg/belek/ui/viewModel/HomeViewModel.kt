@@ -16,7 +16,9 @@ data class LugarUI(
     val nombre: String,
     val descripcion: String,
     val imageRes: Int,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val latitud: Double? = null,
+    val longitud: Double? = null
 )
 
 data class HomeUiState(
@@ -70,7 +72,9 @@ class HomeViewModel(
                             nombre = TranslationHelper.getLugarNombre(lugar, currentLanguage),
                             descripcion = TranslationHelper.getLugarDescripcion(lugar, currentLanguage),
                             imageRes = getImageResourceForPlace(lugar.nombre),
-                            imageUrl = lugar.imagenUrl
+                            imageUrl = lugar.imagenUrl,
+                            latitud = lugar.latitud,
+                            longitud = lugar.longitud
                         )
                     }
 
@@ -113,7 +117,9 @@ class HomeViewModel(
                             nombre = TranslationHelper.getLugarNombre(lugar, currentLanguage),
                             descripcion = TranslationHelper.getLugarDescripcion(lugar, currentLanguage),
                             imageRes = getImageResourceForPlace(lugar.nombre),
-                            imageUrl = lugar.imagenUrl
+                            imageUrl = lugar.imagenUrl,
+                            latitud = lugar.latitud,
+                            longitud = lugar.longitud
                         )
                     }
 

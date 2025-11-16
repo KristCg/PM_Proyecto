@@ -36,7 +36,15 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kriscg.belek.ui.viewModel.HomeViewModel
 import com.kriscg.belek.ui.viewModel.LugarUI
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
 import coil.compose.AsyncImage
+import com.kriscg.belek.ui.screens.details.GoogleMapView
 
 enum class MenuOption {
     VIEW_PROFILE,
@@ -227,29 +235,61 @@ fun ListaContent(
 }
 
 @Composable
-fun MapContent() {
+fun MapContent(
+    lugares: List<LugarUI>,
+    onLugarClick: (Int) -> Unit = {}
+) {
+    val defaultLocation = LatLng(14.6349, -90.5069)
+
+    val markers = remember(lugares) {
+        lugares.mapNotNull { lugar ->
+            val lat = lugar.latitud
+            val lng = lugar.longitud
+            if (lat != null && lng != null) {
+                lugar to LatLng(lat, lng)
+            } else {
+                null
+            }
+        }
+    }
+
+    val initialLocation = markers.firstOrNull()?.second ?: defaultLocation
+
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(initialLocation, 7f)
+    }
+
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.destino),
-            contentDescription = stringResource(R.string.mapa),
-            contentScale = ContentScale.Fit,
-            alpha = 0.3f,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-        )
+        GoogleMap(
+            modifier = Modifier.matchParentSize(),
+            cameraPositionState = cameraPositionState
+        ) {
+            markers.forEach { (lugar, latLng) ->
+                val markerState = rememberMarkerState(position = latLng)
+                Marker(
+                    state = markerState,
+                    title = lugar.nombre,
+                    snippet = lugar.descripcion,
+                    onClick = {
+                        onLugarClick(lugar.id)
+                        false
+                    }
+                )
+            }
+        }
     }
 }
 
+
+
 @Composable
 fun ProfileDrawerContent(
-    onMenuItemClick: (MenuOption) -> Unit = {}
+    onMenuItemClick: (MenuOption) -> Unit = {},
+    onCloseClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -265,6 +305,7 @@ fun ProfileDrawerContent(
                 .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.BottomStart
         ) {
+            
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -282,6 +323,18 @@ fun ProfileDrawerContent(
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
+                )
+            }
+            IconButton(
+                onClick = onCloseClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Cerrar menú",
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
@@ -342,7 +395,6 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Observar cambios de idioma
     val preferencesManager = remember {
         com.kriscg.belek.data.userpreferences.PreferencesManager.getInstance(context)
     }
@@ -361,11 +413,13 @@ fun HomeScreen(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = false,
         drawerContent = {
             ModalDrawerSheet {
                 ProfileDrawerContent(
                     onMenuItemClick = { menuOption ->
-                        onMenuItemClick(menuOption)
+                        onMenuItemClick(menuOption) },
+                    onCloseClick = {
                         scope.launch { drawerState.close() }
                     }
                 )
@@ -406,10 +460,12 @@ fun HomeScreen(
                     )
                 },
                 floatingActionButton = {
-                    FloatingMenuButton(
-                        onNuevoViaje = onNuevoViajeClick,
-                        onCalendario = {}
-                    )
+                    if (uiState.selectedTab == 0) {
+                        FloatingMenuButton(
+                            onNuevoViaje = onNuevoViajeClick,
+                            onCalendario = {}
+                        )
+                    }
                 }
             ) { innerPadding ->
                 Column(
@@ -484,7 +540,10 @@ fun HomeScreen(
                                 lugares = uiState.lugares,
                                 onLugarClick = onLugarClick
                             )
-                            1 -> MapContent()
+                            1 -> MapContent(
+                                lugares = uiState.lugares,
+                                onLugarClick = onLugarClick
+                            )
                         }
                     }
                 }
