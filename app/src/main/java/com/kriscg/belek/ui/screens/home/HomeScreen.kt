@@ -9,15 +9,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,24 +21,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kriscg.belek.R
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DateRange
-import com.kriscg.belek.ui.theme.BelekTheme
+import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kriscg.belek.ui.viewModel.HomeViewModel
 import com.kriscg.belek.ui.viewModel.LugarUI
 import coil.compose.AsyncImage
-import androidx.compose.runtime.collectAsState
 
 @Composable
 fun FloatingMenuButton(
@@ -67,7 +59,7 @@ fun FloatingMenuButton(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     MenuPill(
-                        text = "Nuevo Viaje",
+                        text = stringResource(R.string.nuevo_viaje),
                         icon = Icons.Default.Add
                     ) {
                         expanded = false
@@ -75,7 +67,7 @@ fun FloatingMenuButton(
                     }
 
                     MenuPill(
-                        text = "Calendario",
+                        text = stringResource(R.string.calendario),
                         icon = Icons.Default.DateRange
                     ) {
                         expanded = false
@@ -91,7 +83,7 @@ fun FloatingMenuButton(
                 shape = CircleShape
             ) {
                 val icon = if (expanded) Icons.Default.Close else Icons.Default.Add
-                Icon(icon, contentDescription = if (expanded) "Cerrar" else "Abrir menú")
+                Icon(icon, contentDescription = if (expanded) stringResource(R.string.cerrar) else stringResource(R.string.nuevo_viaje))
             }
         }
     }
@@ -136,10 +128,9 @@ private fun MenuPill(
     }
 }
 
-
 @Composable
 fun CustomTabs(
-    tabs: List<String> = listOf("Lista", "Mapa"),
+    tabs: List<String> = listOf(stringResource(R.string.lista), stringResource(R.string.mapa)),
     selectedTab: Int,
     onTabSelected: (Int) -> Unit
 ) {
@@ -200,7 +191,7 @@ fun ListaContent(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "No se encontraron lugares",
+                text = stringResource(R.string.no_lugares_filtros),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -236,7 +227,7 @@ fun MapContent() {
     ) {
         Image(
             painter = painterResource(id = R.drawable.destino),
-            contentDescription = "Destino",
+            contentDescription = stringResource(R.string.mapa),
             contentScale = ContentScale.Fit,
             alpha = 0.3f,
             modifier = Modifier
@@ -271,13 +262,13 @@ fun ProfileDrawerContent(
             ) {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Usuario",
+                    contentDescription = stringResource(R.string.perfil),
                     modifier = Modifier.size(64.dp),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Nombre de Usuario",
+                    text = stringResource(R.string.nombre_usuario),
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
@@ -286,11 +277,11 @@ fun ProfileDrawerContent(
         }
 
         val menuItems = listOf(
-            "Ver perfil" to Icons.Default.AccountCircle,
-            "Agregar otra cuenta" to Icons.Default.Add,
-            "Historial" to Icons.Default.Menu,
-            "Configuración y privacidad" to Icons.Default.Settings,
-            "Cerrar Sesión" to Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            stringResource(R.string.ver_perfil) to Icons.Default.AccountCircle,
+            stringResource(R.string.agregar_cuenta) to Icons.Default.Add,
+            stringResource(R.string.historial) to Icons.Default.Menu,
+            stringResource(R.string.configuracion_privacidad) to Icons.Default.Settings,
+            stringResource(R.string.cerrar_sesion) to Icons.AutoMirrored.Filled.KeyboardArrowLeft,
         )
 
         menuItems.forEachIndexed { index, (title, icon) ->
@@ -334,11 +325,21 @@ fun HomeScreen(
     onMenuItemClick: (String) -> Unit = {},
     viewModel: HomeViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     var query by remember { mutableStateOf("") }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    val preferencesManager = remember {
+        com.kriscg.belek.data.userpreferences.PreferencesManager.getInstance(context)
+    }
+    val preferences by preferencesManager.preferencesFlow.collectAsState()
+
+    LaunchedEffect(preferences.language) {
+        viewModel.updateLanguage(preferences.language)
+    }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let { error ->
@@ -365,7 +366,7 @@ fun HomeScreen(
                     TopAppBar(
                         title = {
                             Text(
-                                text = "HOGAR",
+                                text = stringResource(R.string.hogar),
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -385,7 +386,7 @@ fun HomeScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Person,
-                                    contentDescription = "Perfil",
+                                    contentDescription = stringResource(R.string.perfil),
                                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
@@ -416,13 +417,13 @@ fun HomeScreen(
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,
-                                contentDescription = "Buscar",
+                                contentDescription = stringResource(R.string.buscar),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
                         placeholder = {
                             Text(
-                                text = "Buscar",
+                                text = stringResource(R.string.buscar),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 16.sp
                             )
@@ -444,7 +445,7 @@ fun HomeScreen(
                     )
 
                     Text(
-                        text = "Lugares Populares",
+                        text = stringResource(R.string.lugares_populares),
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.onBackground
@@ -544,14 +545,5 @@ fun LugarCard(
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeScreenPreview() {
-    BelekTheme {
-        HomeScreen()
     }
 }

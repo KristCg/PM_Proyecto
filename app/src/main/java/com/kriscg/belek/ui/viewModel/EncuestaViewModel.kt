@@ -22,10 +22,10 @@ data class EncuestaUiState(
     val viajeCreado: Boolean = false
 )
 
-class EncuestaViewModel(
-    private val viajesRepository: ViajesRepository = ViajesRepository(),
+class EncuestaViewModel : ViewModel() {
+
+    private val viajesRepository: ViajesRepository = ViajesRepository()
     private val authRepository: AuthRepository = AuthRepository()
-) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EncuestaUiState())
     val uiState: StateFlow<EncuestaUiState> = _uiState.asStateFlow()

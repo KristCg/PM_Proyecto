@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,7 +50,7 @@ fun RegistroScreen(
             )
 
             Text(
-                text = "Registro",
+                text = stringResource(R.string.registro),
                 fontSize = 40.sp
             )
 
@@ -76,7 +77,7 @@ fun RegistroScreen(
                 value = uiState.username,
                 onValueChange = { viewModel.onUsernameChange(it) },
                 shape = RoundedCornerShape(20.dp),
-                placeholder = { Text("Usuario") },
+                placeholder = { Text(stringResource(R.string.usuario)) },
                 singleLine = true,
                 enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth(0.8f)
@@ -88,7 +89,7 @@ fun RegistroScreen(
                 value = uiState.email,
                 onValueChange = { viewModel.onEmailChange(it) },
                 shape = RoundedCornerShape(20.dp),
-                placeholder = { Text("Correo") },
+                placeholder = { Text(stringResource(R.string.correo)) },
                 singleLine = true,
                 enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth(0.8f)
@@ -100,7 +101,7 @@ fun RegistroScreen(
                 value = uiState.password,
                 onValueChange = { viewModel.onPasswordChange(it) },
                 shape = RoundedCornerShape(20.dp),
-                placeholder = { Text("Contraseña") },
+                placeholder = { Text(stringResource(R.string.password)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 enabled = !uiState.isLoading,
@@ -127,7 +128,7 @@ fun RegistroScreen(
                     )
                 } else {
                     Text(
-                        text = "Registrarse",
+                        text = stringResource(R.string.registrarse),
                         fontSize = 15.sp
                     )
                 }

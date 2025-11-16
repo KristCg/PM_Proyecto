@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,7 +27,6 @@ fun LoginScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Navegar cuando el login sea exitoso
     LaunchedEffect(uiState.loginSuccess) {
         if (uiState.loginSuccess) {
             onLoginClick()
@@ -51,7 +51,7 @@ fun LoginScreen(
             )
 
             Text(
-                text = "Login",
+                text = stringResource(R.string.login),
                 fontSize = 40.sp
             )
 
@@ -78,7 +78,7 @@ fun LoginScreen(
                 value = uiState.username,
                 onValueChange = { viewModel.onUsernameChange(it) },
                 shape = RoundedCornerShape(20.dp),
-                placeholder = { Text("Email") },
+                placeholder = { Text(stringResource(R.string.email)) },
                 singleLine = true,
                 enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth(0.8f)
@@ -90,7 +90,7 @@ fun LoginScreen(
                 value = uiState.password,
                 onValueChange = { viewModel.onPasswordChange(it) },
                 shape = RoundedCornerShape(20.dp),
-                placeholder = { Text("Contraseña") },
+                placeholder = { Text(stringResource(R.string.password)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 enabled = !uiState.isLoading,
@@ -117,7 +117,7 @@ fun LoginScreen(
                     )
                 } else {
                     Text(
-                        text = "Iniciar Sesión",
+                        text = stringResource(R.string.iniciar_sesion),
                         fontSize = 15.sp
                     )
                 }
@@ -137,7 +137,7 @@ fun LoginScreen(
                 enabled = !uiState.isLoading
             ) {
                 Text(
-                    text = "Registrarse",
+                    text = stringResource(R.string.registrarse),
                     fontSize = 15.sp
                 )
             }

@@ -1,9 +1,11 @@
 package com.kriscg.belek.ui.viewModel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.kriscg.belek.domain.Lugar
 import com.kriscg.belek.data.repository.LugaresRepository
+import com.kriscg.belek.util.TranslationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,8 +23,10 @@ data class YourTripUiState(
 )
 
 class YourTripViewModel(
+    application: Application
+) : AndroidViewModel(application) {
+
     private val repository: LugaresRepository = LugaresRepository()
-) : ViewModel() {
 
     private val _uiState = MutableStateFlow(YourTripUiState())
     val uiState: StateFlow<YourTripUiState> = _uiState.asStateFlow()
@@ -32,16 +36,25 @@ class YourTripViewModel(
     }
 
     fun initializeFromEncuesta(tipo: String?, presupuesto: String?, ambientes: Set<String>?) {
-        val tiposSet = if (!tipo.isNullOrBlank()) setOf(tipo) else emptySet()
+        val tiposSet = if (!tipo.isNullOrBlank()) {
+            val normalizedTipo = TranslationHelper.normalizeToSpanish(tipo)
+            setOf(normalizedTipo)
+        } else emptySet()
 
-        val preciosSet = when (presupuesto) {
-            "Bajo" -> setOf("Económico")
-            "Mediano" -> setOf("Gama Media")
-            "Alto" -> setOf("Lujo")
+        val preciosSet = when {
+            presupuesto != null -> {
+                val normalizedPresupuesto = TranslationHelper.normalizeToSpanish(presupuesto)
+                when (normalizedPresupuesto) {
+                    "Bajo" -> setOf("Económico")
+                    "Mediano" -> setOf("Gama Media")
+                    "Alto" -> setOf("Lujo")
+                    else -> emptySet()
+                }
+            }
             else -> emptySet()
         }
 
-        val ambientesSet = ambientes ?: emptySet()
+        val ambientesSet = ambientes?.map { TranslationHelper.normalizeToSpanish(it) }?.toSet() ?: emptySet()
 
         println("DEBUG ViewModel: Tipos=$tiposSet, Precios=$preciosSet, Ambientes=$ambientesSet")
 
@@ -51,61 +64,69 @@ class YourTripViewModel(
             ambientesSeleccionados = ambientesSet
         )
 
-        println("DEBUG ViewModel: Estado actualizado - ${_uiState.value.tiposSeleccionados}, ${_uiState.value.preciosSeleccionados}, ${_uiState.value.ambientesSeleccionados}")
-
         loadRecommendations()
     }
 
     fun onTipoToggled(tipo: String) {
+        val normalizedTipo = TranslationHelper.normalizeToSpanish(tipo)
         val currentTipos = _uiState.value.tiposSeleccionados.toMutableSet()
-        if (currentTipos.contains(tipo)) {
-            currentTipos.remove(tipo)
+
+        if (currentTipos.contains(normalizedTipo)) {
+            currentTipos.remove(normalizedTipo)
         } else {
-            currentTipos.add(tipo)
+            currentTipos.add(normalizedTipo)
         }
         _uiState.value = _uiState.value.copy(tiposSeleccionados = currentTipos)
         loadRecommendations()
     }
 
     fun onAmbienteToggled(ambiente: String) {
+        val normalizedAmbiente = TranslationHelper.normalizeToSpanish(ambiente)
         val currentAmbientes = _uiState.value.ambientesSeleccionados.toMutableSet()
-        if (currentAmbientes.contains(ambiente)) {
-            currentAmbientes.remove(ambiente)
+
+        if (currentAmbientes.contains(normalizedAmbiente)) {
+            currentAmbientes.remove(normalizedAmbiente)
         } else {
-            currentAmbientes.add(ambiente)
+            currentAmbientes.add(normalizedAmbiente)
         }
         _uiState.value = _uiState.value.copy(ambientesSeleccionados = currentAmbientes)
         loadRecommendations()
     }
 
     fun onServicioToggled(servicio: String) {
+        val normalizedServicio = TranslationHelper.normalizeToSpanish(servicio)
         val currentServicios = _uiState.value.serviciosSeleccionados.toMutableSet()
-        if (currentServicios.contains(servicio)) {
-            currentServicios.remove(servicio)
+
+        if (currentServicios.contains(normalizedServicio)) {
+            currentServicios.remove(normalizedServicio)
         } else {
-            currentServicios.add(servicio)
+            currentServicios.add(normalizedServicio)
         }
         _uiState.value = _uiState.value.copy(serviciosSeleccionados = currentServicios)
         loadRecommendations()
     }
 
     fun onPrecioToggled(precio: String) {
+        val normalizedPrecio = TranslationHelper.normalizeToSpanish(precio)
         val currentPrecios = _uiState.value.preciosSeleccionados.toMutableSet()
-        if (currentPrecios.contains(precio)) {
-            currentPrecios.remove(precio)
+
+        if (currentPrecios.contains(normalizedPrecio)) {
+            currentPrecios.remove(normalizedPrecio)
         } else {
-            currentPrecios.add(precio)
+            currentPrecios.add(normalizedPrecio)
         }
         _uiState.value = _uiState.value.copy(preciosSeleccionados = currentPrecios)
         loadRecommendations()
     }
 
     fun onMomentoToggled(momento: String) {
+        val normalizedMomento = TranslationHelper.normalizeToSpanish(momento)
         val currentMomentos = _uiState.value.momentosSeleccionados.toMutableSet()
-        if (currentMomentos.contains(momento)) {
-            currentMomentos.remove(momento)
+
+        if (currentMomentos.contains(normalizedMomento)) {
+            currentMomentos.remove(normalizedMomento)
         } else {
-            currentMomentos.add(momento)
+            currentMomentos.add(normalizedMomento)
         }
         _uiState.value = _uiState.value.copy(momentosSeleccionados = currentMomentos)
         loadRecommendations()

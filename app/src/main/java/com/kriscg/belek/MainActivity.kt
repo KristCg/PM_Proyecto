@@ -1,5 +1,7 @@
 package com.kriscg.belek
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,8 +36,28 @@ import com.kriscg.belek.ui.navigation.profile.profileNavigation
 import com.kriscg.belek.ui.navigation.config.configNavigation
 import com.kriscg.belek.ui.navigation.login.Login
 import com.kriscg.belek.ui.navigation.profile.editProfileNavigation
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(newBase: Context) {
+        val sharedPreferences = newBase.getSharedPreferences("belek_preferences", Context.MODE_PRIVATE)
+        val languageCode = sharedPreferences.getString("language", "es") ?: "es"
+
+        val context = updateLocale(newBase, languageCode)
+        super.attachBaseContext(context)
+    }
+
+    private fun updateLocale(context: Context, languageCode: String): Context {
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val config = Configuration(context.resources.configuration)
+        config.setLocale(locale)
+
+        return context.createConfigurationContext(config)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -47,6 +69,13 @@ class MainActivity : ComponentActivity() {
                 com.kriscg.belek.data.userpreferences.PreferencesManager.getInstance(applicationContext)
             }
             val preferences by preferencesManager.preferencesFlow.collectAsState()
+
+            LaunchedEffect(preferences.language) {
+                val currentLocale = resources.configuration.locales[0].language
+                if (currentLocale != preferences.language) {
+                    recreate()
+                }
+            }
 
             BelekTheme(darkTheme = preferences.isDarkTheme) {
                 AppNavigation()
@@ -155,7 +184,10 @@ fun AppNavigation() {
 
         yourTripNavigation(
             onNavigateBack = {
-                navController.navigateUp()
+                navController.navigate(Home) {
+                    popUpTo(Home) { inclusive = true }
+                    launchSingleTop = true
+                }
             },
             onNavigateToDetails = { lugarId ->
                 navController.navigate(Details(lugarId = lugarId)) {

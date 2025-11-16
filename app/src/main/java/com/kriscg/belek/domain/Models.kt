@@ -24,6 +24,8 @@ data class Lugar(
     val ambiente: String? = null,
     val servicios: String? = null,
     val precio: String? = null,
+    @SerialName("precio_en")
+    val precioEn: String? = null,
     val calificacion: Float? = null,
     @SerialName("imagen_url")
     val imagenUrl: String? = null,
@@ -36,7 +38,11 @@ data class Lugar(
     val coordenadas: String? = null,
     val departamento: String? = null,
     val latitud: Double? = null,
-    val longitud: Double? = null
+    val longitud: Double? = null,
+    @SerialName("nombre_en")
+    val nombreEn: String? = null,
+    @SerialName("descripcion_en")
+    val descripcionEn: String? = null
 )
 
 @Serializable

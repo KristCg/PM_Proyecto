@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,28 +49,6 @@ import com.kriscg.belek.ui.viewModel.EncuestaViewModel
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-val tipos = listOf(
-    "Arqueológicos",
-    "Naturales",
-    "Históricos",
-    "Culturales",
-    "Ecoturísticos",
-    "Gastronómicos",
-    "Recreativos",
-    "Comerciales"
-)
-
-val presupuesto = listOf("Alto", "Mediano", "Bajo")
-
-val ambientes = listOf(
-    "Familiares",
-    "Románticos",
-    "Aventura",
-    "Cultural",
-    "Nocturnos",
-    "Espiritual"
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncuestaScreen(
@@ -79,6 +58,32 @@ fun EncuestaScreen(
     viewModel: EncuestaViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    val tipos = listOf(
+        stringResource(R.string.arqueologicos),
+        stringResource(R.string.naturales),
+        stringResource(R.string.historicos),
+        stringResource(R.string.culturales),
+        stringResource(R.string.ecoturisticos),
+        stringResource(R.string.gastronomicos),
+        stringResource(R.string.recreativos),
+        stringResource(R.string.comerciales)
+    )
+
+    val presupuesto = listOf(
+        stringResource(R.string.alto),
+        stringResource(R.string.mediano),
+        stringResource(R.string.bajo)
+    )
+
+    val ambientes = listOf(
+        stringResource(R.string.familiares),
+        stringResource(R.string.romanticos),
+        stringResource(R.string.aventura),
+        stringResource(R.string.cultural),
+        stringResource(R.string.nocturnos),
+        stringResource(R.string.espiritual)
+    )
 
     LaunchedEffect(uiState.viajeCreado) {
         if (uiState.viajeCreado) {
@@ -104,7 +109,7 @@ fun EncuestaScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Nuevo Viaje",
+                        text = stringResource(R.string.nuevo_viaje),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -113,7 +118,7 @@ fun EncuestaScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.ChevronLeft,
-                            contentDescription = "Regresar"
+                            contentDescription = stringResource(R.string.volver)
                         )
                     }
                 }
@@ -132,7 +137,6 @@ fun EncuestaScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.Top,
             ) {
-                // Mostrar error si existe
                 if (uiState.error != null) {
                     Card(
                         modifier = Modifier
@@ -151,7 +155,7 @@ fun EncuestaScreen(
                 }
 
                 Text(
-                    text = "Destino de viaje:",
+                    text = stringResource(R.string.destino_viaje),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -162,7 +166,7 @@ fun EncuestaScreen(
                     value = uiState.destino,
                     onValueChange = { viewModel.onDestinoChange(it) },
                     shape = RoundedCornerShape(10.dp),
-                    placeholder = { Text("Dirección") },
+                    placeholder = { Text(stringResource(R.string.direccion)) },
                     singleLine = true,
                     enabled = !uiState.isLoading,
                     modifier = Modifier.fillMaxWidth(),
@@ -177,7 +181,7 @@ fun EncuestaScreen(
 
                 Image(
                     painter = painterResource(id = R.drawable.destino),
-                    contentDescription = "Destino",
+                    contentDescription = stringResource(R.string.destino_viaje),
                     contentScale = ContentScale.Fit,
                     alpha = 0.3f,
                     modifier = Modifier
@@ -188,7 +192,7 @@ fun EncuestaScreen(
                 Spacer(Modifier.height(30.dp))
 
                 Text(
-                    text = "Tipo de viaje:",
+                    text = stringResource(R.string.tipo_viaje),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -211,7 +215,7 @@ fun EncuestaScreen(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    text = "Presupuesto:",
+                    text = stringResource(R.string.presupuesto),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -234,7 +238,7 @@ fun EncuestaScreen(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    text = "Ambiente deseado:",
+                    text = stringResource(R.string.ambiente_deseado),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -275,7 +279,7 @@ fun EncuestaScreen(
                         )
                     } else {
                         Text(
-                            text = "Ver opciones",
+                            text = stringResource(R.string.ver_opciones),
                             fontSize = 15.sp
                         )
                     }

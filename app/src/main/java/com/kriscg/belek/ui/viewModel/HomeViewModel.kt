@@ -1,8 +1,11 @@
 package com.kriscg.belek.ui.viewModel
 
-import androidx.lifecycle.ViewModel
+import android.annotation.SuppressLint
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.kriscg.belek.data.repository.LugaresRepository
+import com.kriscg.belek.util.TranslationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,39 +24,60 @@ data class HomeUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val searchQuery: String = "",
-    val selectedTab: Int = 0
+    val selectedTab: Int = 0,
+    val currentLanguage: String = "es"
 )
 
 class HomeViewModel(
+    application: Application
+) : AndroidViewModel(application) {
+
     private val repository: LugaresRepository = LugaresRepository()
-) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    @SuppressLint("StaticFieldLeak")
+    private val context = application.applicationContext
+
     init {
         loadLugares()
+    }
+
+    fun updateLanguage(newLanguage: String) {
+        if (_uiState.value.currentLanguage != newLanguage) {
+            _uiState.value = _uiState.value.copy(currentLanguage = newLanguage)
+            // Recargar lugares con el nuevo idioma
+            if (_uiState.value.searchQuery.isBlank()) {
+                loadLugares()
+            } else {
+                searchLugares(_uiState.value.searchQuery)
+            }
+        }
     }
 
     fun loadLugares() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
+            val currentLanguage = TranslationHelper.getCurrentLanguage(context)
+
             repository.getAllLugares()
                 .onSuccess { lugaresDB ->
                     val lugares = lugaresDB.map { lugar ->
                         LugarUI(
                             id = lugar.id ?: 0,
-                            nombre = lugar.nombre,
-                            descripcion = lugar.descripcion,
+                            nombre = TranslationHelper.getLugarNombre(lugar, currentLanguage),
+                            descripcion = TranslationHelper.getLugarDescripcion(lugar, currentLanguage),
                             imageRes = getImageResourceForPlace(lugar.nombre),
-                            imageUrl = lugar.imagenUrl // Incluir URL de Supabase
+                            imageUrl = lugar.imagenUrl
                         )
                     }
 
                     _uiState.value = _uiState.value.copy(
                         lugares = lugares,
-                        isLoading = false
+                        isLoading = false,
+                        currentLanguage = currentLanguage
                     )
                 }
                 .onFailure { exception ->
@@ -79,13 +103,15 @@ class HomeViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
+            val currentLanguage = TranslationHelper.getCurrentLanguage(context)
+
             repository.searchLugares(query)
                 .onSuccess { lugaresDB ->
                     val lugares = lugaresDB.map { lugar ->
                         LugarUI(
                             id = lugar.id ?: 0,
-                            nombre = lugar.nombre,
-                            descripcion = lugar.descripcion,
+                            nombre = TranslationHelper.getLugarNombre(lugar, currentLanguage),
+                            descripcion = TranslationHelper.getLugarDescripcion(lugar, currentLanguage),
                             imageRes = getImageResourceForPlace(lugar.nombre),
                             imageUrl = lugar.imagenUrl
                         )
@@ -93,7 +119,8 @@ class HomeViewModel(
 
                     _uiState.value = _uiState.value.copy(
                         lugares = lugares,
-                        isLoading = false
+                        isLoading = false,
+                        currentLanguage = currentLanguage
                     )
                 }
                 .onFailure { exception ->

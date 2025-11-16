@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,7 +61,6 @@ fun TuViajeScreen(
     ambientesJson: String? = null,
     onBackClick: () -> Unit = {},
     onLugarClick: (Int) -> Unit = {},
-    modifier: Modifier = Modifier,
     viewModel: YourTripViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -104,7 +104,7 @@ fun TuViajeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "TU VIAJE",
+                        text = stringResource(R.string.tu_viaje),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                     )
@@ -113,7 +113,7 @@ fun TuViajeScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(R.string.volver)
                         )
                     }
                 }
@@ -128,20 +128,30 @@ fun TuViajeScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             MultiFilterSection(
-                title = "Tipo de Lugar",
+                title = stringResource(R.string.tipo_lugar),
                 options = listOf(
-                    "Arqueológicos", "Naturales", "Históricos", "Culturales",
-                    "Ecoturísticos", "Gastronómicos", "Recreativos", "Comerciales"
+                    stringResource(R.string.arqueologicos),
+                    stringResource(R.string.naturales),
+                    stringResource(R.string.historicos),
+                    stringResource(R.string.culturales),
+                    stringResource(R.string.ecoturisticos),
+                    stringResource(R.string.gastronomicos),
+                    stringResource(R.string.recreativos),
+                    stringResource(R.string.comerciales)
                 ),
                 selectedOptions = uiState.tiposSeleccionados,
                 onOptionToggled = { viewModel.onTipoToggled(it) }
             )
 
             MultiFilterSection(
-                title = "Ambiente",
+                title = stringResource(R.string.ambiente),
                 options = listOf(
-                    "Familiares", "Románticos", "Aventura", "Cultural",
-                    "Nocturnos", "Espiritual"
+                    stringResource(R.string.familiares),
+                    stringResource(R.string.romanticos),
+                    stringResource(R.string.aventura),
+                    stringResource(R.string.cultural),
+                    stringResource(R.string.nocturnos),
+                    stringResource(R.string.espiritual)
                 ),
                 selectedOptions = uiState.ambientesSeleccionados,
                 onOptionToggled = {
@@ -152,29 +162,39 @@ fun TuViajeScreen(
             )
 
             MultiFilterSection(
-                title = "Servicios",
+                title = stringResource(R.string.servicios),
                 options = listOf(
-                    "Estacionamiento", "Wifi", "Petfriendly", "Accesible",
-                    "Transporte Incluido", "Tours Incluidos"
+                    stringResource(R.string.estacionamiento),
+                    stringResource(R.string.wifi),
+                    stringResource(R.string.petfriendly),
+                    stringResource(R.string.accesible),
+                    stringResource(R.string.transporte_incluido),
+                    stringResource(R.string.tours_incluidos)
                 ),
                 selectedOptions = uiState.serviciosSeleccionados,
                 onOptionToggled = { viewModel.onServicioToggled(it) }
             )
 
             MultiFilterSection(
-                title = "Precios",
+                title = stringResource(R.string.precios),
                 options = listOf(
-                    "Económico", "Gama Media", "Lujo"
+                    stringResource(R.string.economico),
+                    stringResource(R.string.gama_media),
+                    stringResource(R.string.lujo)
                 ),
                 selectedOptions = uiState.preciosSeleccionados,
                 onOptionToggled = { viewModel.onPrecioToggled(it) }
             )
 
             MultiFilterSection(
-                title = "Momento del Día",
+                title = stringResource(R.string.momento_dia),
                 options = listOf(
-                    "Amanecer", "Matutino", "Mediodía", "Vespertino",
-                    "Atardecer", "Nocturno"
+                    stringResource(R.string.amanecer),
+                    stringResource(R.string.matutino),
+                    stringResource(R.string.mediodia),
+                    stringResource(R.string.vespertino),
+                    stringResource(R.string.atardecer),
+                    stringResource(R.string.nocturno)
                 ),
                 selectedOptions = uiState.momentosSeleccionados,
                 onOptionToggled = { viewModel.onMomentoToggled(it) }
@@ -199,7 +219,7 @@ fun TuViajeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = uiState.error ?: "Error desconocido",
+                        text = uiState.error ?: stringResource(R.string.error_desconocido),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -212,7 +232,7 @@ fun TuViajeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No se encontraron lugares con los filtros seleccionados",
+                        text = stringResource(R.string.no_lugares_filtros),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -255,7 +275,7 @@ fun MultiFilterSection(
             color = MaterialTheme.colorScheme.onBackground
         )
 
-        if (title == "Ambiente") {
+        if (title == stringResource(R.string.ambiente)) {
             Log.d(TAG, "Renderizando $title - Seleccionados: $selectedOptions")
         }
 
@@ -265,7 +285,7 @@ fun MultiFilterSection(
             items(options) { option ->
                 val isSelected = selectedOptions.contains(option)
 
-                if (title == "Ambiente") {
+                if (title == stringResource(R.string.ambiente)) {
                     Log.d(TAG, "Chip '$option' - isSelected: $isSelected")
                 }
 
