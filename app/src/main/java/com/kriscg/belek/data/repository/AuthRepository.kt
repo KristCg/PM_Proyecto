@@ -11,6 +11,8 @@ class AuthRepository {
 
     suspend fun signUp(email: String, password: String, username: String): Result<Unit> {
         return try {
+            println("DEBUG Auth: Intentando registrar usuario...")
+
             client.auth.signUpWith(Email) {
                 this.email = email
                 this.password = password
@@ -18,6 +20,8 @@ class AuthRepository {
 
             val userId = client.auth.currentUserOrNull()?.id
                 ?: throw Exception("User ID not found")
+
+            println("DEBUG Auth: Usuario registrado con ID: $userId")
 
             client.from("usuarios").insert(
                 Usuario(
@@ -27,39 +31,62 @@ class AuthRepository {
                 )
             )
 
+            println("DEBUG Auth: Registro completo")
             Result.success(Unit)
         } catch (e: Exception) {
+            println("DEBUG Auth ERROR: ${e.message}")
             Result.failure(e)
         }
     }
 
     suspend fun signIn(email: String, password: String): Result<Unit> {
         return try {
+            println("DEBUG Auth: Intentando iniciar sesión...")
+
             client.auth.signInWith(Email) {
                 this.email = email
                 this.password = password
             }
+
+            val session = client.auth.currentSessionOrNull()
+            println("DEBUG Auth: Sesión obtenida - Token: ${session?.accessToken?.take(20)}...")
+            println("DEBUG Auth: Usuario ID: ${session?.user?.id}")
+
             Result.success(Unit)
         } catch (e: Exception) {
+            println("DEBUG Auth ERROR: ${e.message}")
             Result.failure(e)
         }
     }
 
     suspend fun signOut(): Result<Unit> {
         return try {
+            println("DEBUG Auth: Cerrando sesión...")
             client.auth.signOut()
+            println("DEBUG Auth: Sesión cerrada")
             Result.success(Unit)
         } catch (e: Exception) {
+            println("DEBUG Auth ERROR al cerrar sesión: ${e.message}")
             Result.failure(e)
         }
     }
 
     fun getCurrentUserId(): String? {
-        return client.auth.currentUserOrNull()?.id
+        val userId = client.auth.currentUserOrNull()?.id
+        println("DEBUG Auth: getCurrentUserId() = $userId")
+        return userId
     }
 
     fun isUserLoggedIn(): Boolean {
-        return client.auth.currentUserOrNull() != null
+        val session = client.auth.currentSessionOrNull()
+        val user = client.auth.currentUserOrNull()
+
+        println("DEBUG Auth: isUserLoggedIn()")
+        println("  - Session: ${session != null}")
+        println("  - User: ${user != null}")
+        println("  - User ID: ${user?.id}")
+
+        return user != null && session != null
     }
 
     suspend fun updatePassword(newPassword: String): Result<Unit> {

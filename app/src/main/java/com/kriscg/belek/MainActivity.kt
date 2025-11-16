@@ -4,9 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.kriscg.belek.data.repository.AuthRepository
 import com.kriscg.belek.ui.theme.BelekTheme
 import com.kriscg.belek.ui.navigation.login.AuthGraph
 import com.kriscg.belek.ui.navigation.login.Registro
@@ -30,9 +38,17 @@ import com.kriscg.belek.ui.navigation.profile.editProfileNavigation
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        com.kriscg.belek.data.SupabaseConfig.initialize(applicationContext)
+
         enableEdgeToEdge()
         setContent {
-            BelekTheme {
+            val preferencesManager = remember {
+                com.kriscg.belek.data.userpreferences.PreferencesManager.getInstance(applicationContext)
+            }
+            val preferences by preferencesManager.preferencesFlow.collectAsState()
+
+            BelekTheme(darkTheme = preferences.isDarkTheme) {
                 AppNavigation()
             }
         }
@@ -42,15 +58,46 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val authRepository = remember { AuthRepository() }
+
+    var startDestination by remember {
+        mutableStateOf<Any>(AuthGraph)
+    }
+    var isCheckingAuth by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(100)
+
+        val isLoggedIn = authRepository.isUserLoggedIn()
+        println("DEBUG Auth: Usuario logueado = $isLoggedIn")
+
+        startDestination = if (isLoggedIn) {
+            println("DEBUG Auth: Navegando a Home")
+            Home
+        } else {
+            println("DEBUG Auth: Navegando a Login")
+            AuthGraph
+        }
+        isCheckingAuth = false
+    }
+
+    if (isCheckingAuth) {
+        androidx.compose.foundation.layout.Box(
+            modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+            contentAlignment = androidx.compose.ui.Alignment.Center
+        ) {
+            androidx.compose.material3.CircularProgressIndicator()
+        }
+        return
+    }
 
     NavHost(
         navController = navController,
-        startDestination = AuthGraph
+        startDestination = startDestination
     ) {
         authNavigation(
             onNavigateToRegistro = {
-                navController.navigate(Registro) {
-                }
+                navController.navigate(Registro)
             },
             onNavigateToHome = {
                 navController.navigate(Home) {

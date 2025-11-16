@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Belek</string>
+
+    <!-- Login/Register -->
+    <string name="login">Login</string>
+    <string name="registro">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="usuario">Username</string>
+    <string name="correo">Email</string>
+    <string name="iniciar_sesion">Sign In</string>
+    <string name="registrarse">Sign Up</string>
+    <string name="volver">Back</string>
+
+    <!-- Home -->
+    <string name="hogar">HOME</string>
+    <string name="buscar">Search</string>
+    <string name="lugares_populares">Popular Places</string>
+    <string name="nuevo_viaje">New Trip</string>
+    <string name="calendario">Calendar</string>
+    <string name="lista">List</string>
+    <string name="mapa">Map</string>
+
+    <!-- Menu -->
+    <string name="ver_perfil">View profile</string>
+    <string name="agregar_cuenta">Add another account</string>
+    <string name="historial">History</string>
+    <string name="configuracion_privacidad">Settings and privacy</string>
+    <string name="cerrar_sesion">Log Out</string>
+    <string name="nombre_usuario">Username</string>
+
+    <!-- Survey -->
+    <string name="destino_viaje">Travel destination:</string>
+    <string name="direccion">Address</string>
+    <string name="tipo_viaje">Type of trip:</string>
+    <string name="presupuesto">Budget:</string>
+    <string name="ambiente_deseado">Desired atmosphere:</string>
+    <string name="ver_opciones">View options</string>
+
+    <!-- Place types -->
+    <string name="arqueologicos">Archaeological</string>
+    <string name="naturales">Natural</string>
+    <string name="historicos">Historical</string>
+    <string name="culturales">Cultural</string>
+    <string name="ecoturisticos">Ecotourism</string>
+    <string name="gastronomicos">Gastronomic</string>
+    <string name="recreativos">Recreational</string>
+    <string name="comerciales">Commercial</string>
+
+    <!-- Budget -->
+    <string name="alto">High</string>
+    <string name="mediano">Medium</string>
+    <string name="bajo">Low</string>
+
+    <!-- Atmospheres -->
+    <string name="familiares">Family-friendly</string>
+    <string name="romanticos">Romantic</string>
+    <string name="aventura">Adventure</string>
+    <string name="cultural">Cultural</string>
+    <string name="nocturnos">Nightlife</string>
+    <string name="espiritual">Spiritual</string>
+
+    <!-- Your Trip -->
+    <string name="tu_viaje">YOUR TRIP</string>
+    <string name="tipo_lugar">Place Type</string>
+    <string name="ambiente">Atmosphere</string>
+    <string name="servicios">Services</string>
+    <string name="precios">Prices</string>
+    <string name="momento_dia">Time of Day</string>
+    <string name="no_lugares_filtros">No places found with selected filters</string>
+
+    <!-- Services -->
+    <string name="estacionamiento">Parking</string>
+    <string name="wifi">Wifi</string>
+    <string name="petfriendly">Pet-friendly</string>
+    <string name="accesible">Accessible</string>
+    <string name="transporte_incluido">Transport Included</string>
+    <string name="tours_incluidos">Tours Included</string>
+
+    <!-- Prices -->
+    <string name="economico">Budget</string>
+    <string name="gama_media">Mid-range</string>
+    <string name="lujo">Luxury</string>
+
+    <!-- Times of day -->
+    <string name="amanecer">Sunrise</string>
+    <string name="matutino">Morning</string>
+    <string name="mediodia">Noon</string>
+    <string name="vespertino">Afternoon</string>
+    <string name="atardecer">Sunset</string>
+    <string name="nocturno">Night</string>
+
+    <!-- Details -->
+    <string name="detalles">DETAILS</string>
+    <string name="descripcion">Description</string>
+    <string name="calificaciones">Reviews</string>
+    <string name="tu_resena">Your review</string>
+    <string name="comentario">Comment</string>
+    <string name="placeholder_comentario">Tell us what you thought of this place</string>
+    <string name="calificacion_text">Leave your rating</string>
+    <string name="enviar">Submit</string>
+    <string name="cerrar">Close</string>
+    <string name="no_resenas">No reviews yet</string>
+    <string name="agregar_resena">Add review</string>
+
+    <!-- Profile -->
+    <string name="perfil">Profile</string>
+    <string name="editar_perfil">Edit profile</string>
+    <string name="favoritos">Favorites</string>
+    <string name="guardados">Saved</string>
+    <string name="resenas">Reviews</string>
+
+    <!-- Settings -->
+    <string name="configuraciones">Settings</string>
+    <string name="tema_oscuro">Dark Theme</string>
+    <string name="cambiar_idioma">Change Language</string>
+    <string name="moneda_cambio">Currency</string>
+    <string name="privacidad">Privacy</string>
+    <string name="info_publica">User information public</string>
+    <string name="seleccionar_idioma">Select Language</string>
+    <string name="seleccionar_moneda">Select Currency</string>
+    <string name="cancelar">Cancel</string>
+    <string name="regresar">Back</string>
+
+    <!-- Languages -->
+    <string name="idioma_espanol">Español</string>
+    <string name="idioma_ingles">English</string>
+    <string name="idioma_frances">Français</string>
+    <string name="idioma_aleman">Deutsch</string>
+
+    <!-- Currencies -->
+    <string name="moneda_quetzales">Quetzales (Q)</string>
+    <string name="moneda_dolares">Dollars (USD)</string>
+    <string name="moneda_euros">Euros (EUR)</string>
+    <string name="moneda_pesos">Mexican Pesos (MXN)</string>
+
+    <!-- Messages -->
+    <string name="cargando">Loading…</string>
+    <string name="error_desconocido">Unknown error</string>
+    <string name="reintentar">Retry</string>
+</resources>

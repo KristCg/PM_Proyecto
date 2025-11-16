@@ -1,3 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Belek</string>
+
+    <!-- Login/Registro -->
+    <string name="login">Login</string>
+    <string name="registro">Registro</string>
+    <string name="email">Email</string>
+    <string name="password">Contraseña</string>
+    <string name="usuario">Usuario</string>
+    <string name="correo">Correo</string>
+    <string name="iniciar_sesion">Iniciar Sesión</string>
+    <string name="registrarse">Registrarse</string>
+    <string name="volver">Volver</string>
+
+    <!-- Home -->
+    <string name="hogar">HOGAR</string>
+    <string name="buscar">Buscar</string>
+    <string name="lugares_populares">Lugares Populares</string>
+    <string name="nuevo_viaje">Nuevo Viaje</string>
+    <string name="calendario">Calendario</string>
+    <string name="lista">Lista</string>
+    <string name="mapa">Mapa</string>
+
+    <!-- Menu -->
+    <string name="ver_perfil">Ver perfil</string>
+    <string name="agregar_cuenta">Agregar otra cuenta</string>
+    <string name="historial">Historial</string>
+    <string name="configuracion_privacidad">Configuración y privacidad</string>
+    <string name="cerrar_sesion">Cerrar Sesión</string>
+    <string name="nombre_usuario">Nombre de Usuario</string>
+
+    <!-- Encuesta -->
+    <string name="destino_viaje">Destino de viaje:</string>
+    <string name="direccion">Dirección</string>
+    <string name="tipo_viaje">Tipo de viaje:</string>
+    <string name="presupuesto">Presupuesto:</string>
+    <string name="ambiente_deseado">Ambiente deseado:</string>
+    <string name="ver_opciones">Ver opciones</string>
+
+    <!-- Tipos de lugar -->
+    <string name="arqueologicos">Arqueológicos</string>
+    <string name="naturales">Naturales</string>
+    <string name="historicos">Históricos</string>
+    <string name="culturales">Culturales</string>
+    <string name="ecoturisticos">Ecoturísticos</string>
+    <string name="gastronomicos">Gastronómicos</string>
+    <string name="recreativos">Recreativos</string>
+    <string name="comerciales">Comerciales</string>
+
+    <!-- Presupuesto -->
+    <string name="alto">Alto</string>
+    <string name="mediano">Mediano</string>
+    <string name="bajo">Bajo</string>
+
+    <!-- Ambientes -->
+    <string name="familiares">Familiares</string>
+    <string name="romanticos">Románticos</string>
+    <string name="aventura">Aventura</string>
+    <string name="cultural">Cultural</string>
+    <string name="nocturnos">Nocturnos</string>
+    <string name="espiritual">Espiritual</string>
+
+    <!-- Tu Viaje -->
+    <string name="tu_viaje">TU VIAJE</string>
+    <string name="tipo_lugar">Tipo de Lugar</string>
+    <string name="ambiente">Ambiente</string>
+    <string name="servicios">Servicios</string>
+    <string name="precios">Precios</string>
+    <string name="momento_dia">Momento del Día</string>
+    <string name="no_lugares_filtros">No se encontraron lugares con los filtros seleccionados</string>
+
+    <!-- Servicios -->
+    <string name="estacionamiento">Estacionamiento</string>
+    <string name="wifi">Wifi</string>
+    <string name="petfriendly">Petfriendly</string>
+    <string name="accesible">Accesible</string>
+    <string name="transporte_incluido">Transporte Incluido</string>
+    <string name="tours_incluidos">Tours Incluidos</string>
+
+    <!-- Precios -->
+    <string name="economico">Económico</string>
+    <string name="gama_media">Gama Media</string>
+    <string name="lujo">Lujo</string>
+
+    <!-- Momentos del día -->
+    <string name="amanecer">Amanecer</string>
+    <string name="matutino">Matutino</string>
+    <string name="mediodia">Mediodía</string>
+    <string name="vespertino">Vespertino</string>
+    <string name="atardecer">Atardecer</string>
+    <string name="nocturno">Nocturno</string>
+
+    <!-- Detalles -->
+    <string name="detalles">DETALLES</string>
+    <string name="descripcion">Descripción</string>
+    <string name="calificaciones">Calificaciones</string>
+    <string name="tu_resena">Tu reseña</string>
+    <string name="comentario">Comentario</string>
+    <string name="placeholder_comentario">Cuéntanos qué te pareció el lugar</string>
+    <string name="calificacion_text">Déjanos tu calificación</string>
+    <string name="enviar">Enviar</string>
+    <string name="cerrar">Cerrar</string>
+    <string name="no_resenas">No hay reseñas aún</string>
+    <string name="agregar_resena">Agregar reseña</string>
+
+    <!-- Perfil -->
+    <string name="perfil">Perfil</string>
+    <string name="editar_perfil">Editar perfil</string>
+    <string name="favoritos">Favoritos</string>
+    <string name="guardados">Guardados</string>
+    <string name="resenas">Reseñas</string>
+
+    <!-- Configuración -->
+    <string name="configuraciones">Configuraciones</string>
+    <string name="tema_oscuro">Tema Oscuro</string>
+    <string name="cambiar_idioma">Cambiar Idioma</string>
+    <string name="moneda_cambio">Moneda de cambio</string>
+    <string name="privacidad">Privacidad</string>
+    <string name="info_publica">Información usuario pública</string>
+    <string name="seleccionar_idioma">Seleccionar Idioma</string>
+    <string name="seleccionar_moneda">Seleccionar Moneda</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="regresar">Regresar</string>
+
+    <!-- Idiomas -->
+    <string name="idioma_espanol">Español</string>
+    <string name="idioma_ingles">English</string>
+    <string name="idioma_frances">Français</string>
+    <string name="idioma_aleman">Deutsch</string>
+
+    <!-- Monedas -->
+    <string name="moneda_quetzales">Quetzales (Q)</string>
+    <string name="moneda_dolares">Dólares (USD)</string>
+    <string name="moneda_euros">Euros (EUR)</string>
+    <string name="moneda_pesos">Pesos Mexicanos (MXN)</string>
+
+    <!-- Mensajes -->
+    <string name="cargando">Cargando…</string>
+    <string name="error_desconocido">Error desconocido</string>
+    <string name="reintentar">Reintentar</string>
 </resources>
