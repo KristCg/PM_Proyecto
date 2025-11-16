@@ -20,21 +20,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kriscg.belek.R
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.kriscg.belek.ui.theme.BelekTheme
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kriscg.belek.ui.viewModel.HomeViewModel
 import com.kriscg.belek.ui.viewModel.LugarUI
 import coil.compose.AsyncImage
+
+enum class MenuOption {
+    VIEW_PROFILE,
+    ADD_ACCOUNT,
+    HISTORY,
+    SETTINGS,
+    LOGOUT
+}
 
 @Composable
 fun FloatingMenuButton(
@@ -239,7 +249,7 @@ fun MapContent() {
 
 @Composable
 fun ProfileDrawerContent(
-    onMenuItemClick: (String) -> Unit = {}
+    onMenuItemClick: (MenuOption) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -277,14 +287,14 @@ fun ProfileDrawerContent(
         }
 
         val menuItems = listOf(
-            stringResource(R.string.ver_perfil) to Icons.Default.AccountCircle,
-            stringResource(R.string.agregar_cuenta) to Icons.Default.Add,
-            stringResource(R.string.historial) to Icons.Default.Menu,
-            stringResource(R.string.configuracion_privacidad) to Icons.Default.Settings,
-            stringResource(R.string.cerrar_sesion) to Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            Triple(stringResource(R.string.ver_perfil), Icons.Default.AccountCircle, MenuOption.VIEW_PROFILE),
+            Triple(stringResource(R.string.agregar_cuenta), Icons.Default.Add, MenuOption.ADD_ACCOUNT),
+            Triple(stringResource(R.string.historial), Icons.Default.Menu, MenuOption.HISTORY),
+            Triple(stringResource(R.string.configuracion_privacidad), Icons.Default.Settings, MenuOption.SETTINGS),
+            Triple(stringResource(R.string.cerrar_sesion), Icons.AutoMirrored.Filled.KeyboardArrowLeft, MenuOption.LOGOUT),
         )
 
-        menuItems.forEachIndexed { index, (title, icon) ->
+        menuItems.forEachIndexed { index, (title, icon, option) ->
             if (index == 2 || index == 4) {
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 8.dp),
@@ -296,7 +306,7 @@ fun ProfileDrawerContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onMenuItemClick(title) }
+                    .clickable { onMenuItemClick(option) }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -322,7 +332,7 @@ fun ProfileDrawerContent(
 fun HomeScreen(
     onNuevoViajeClick: () -> Unit = {},
     onLugarClick: (Int) -> Unit = {},
-    onMenuItemClick: (String) -> Unit = {},
+    onMenuItemClick: (MenuOption) -> Unit = {},
     viewModel: HomeViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -332,6 +342,7 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    // Observar cambios de idioma
     val preferencesManager = remember {
         com.kriscg.belek.data.userpreferences.PreferencesManager.getInstance(context)
     }
@@ -353,8 +364,8 @@ fun HomeScreen(
         drawerContent = {
             ModalDrawerSheet {
                 ProfileDrawerContent(
-                    onMenuItemClick = { item ->
-                        onMenuItemClick(item)
+                    onMenuItemClick = { menuOption ->
+                        onMenuItemClick(menuOption)
                         scope.launch { drawerState.close() }
                     }
                 )
@@ -545,5 +556,13 @@ fun LugarCard(
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenPreview() {
+    BelekTheme {
+        HomeScreen()
     }
 }

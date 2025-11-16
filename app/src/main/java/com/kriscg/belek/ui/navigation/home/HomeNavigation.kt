@@ -4,8 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
 import com.kriscg.belek.ui.screens.home.HomeScreen
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.kriscg.belek.ui.viewModel.HomeViewModel
+import com.kriscg.belek.ui.screens.home.MenuOption
 import com.kriscg.belek.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 
@@ -25,17 +24,20 @@ fun NavGraphBuilder.homeNavigation(
         HomeScreen(
             onNuevoViajeClick = onNavigateToEncuesta,
             onLugarClick = onNavigateToDetails,
-            onMenuItemClick = { menuItem ->
-                when (menuItem) {
-                    "Ver perfil" -> onNavigateToProfile()
-                    "Configuración y privacidad" -> onToConfig()
-                    "Cerrar Sesión" -> {
+            onMenuItemClick = { menuOption ->
+                when (menuOption) {
+                    MenuOption.VIEW_PROFILE -> onNavigateToProfile()
+                    MenuOption.ADD_ACCOUNT -> {
+                    }
+                    MenuOption.HISTORY -> {
+                    }
+                    MenuOption.SETTINGS -> onToConfig()
+                    MenuOption.LOGOUT -> {
                         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
                             authRepository.signOut()
                             onLogout()
                         }
                     }
-                    "Historial" -> {}
                 }
             }
         )

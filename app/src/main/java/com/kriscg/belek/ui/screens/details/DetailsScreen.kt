@@ -24,11 +24,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.kriscg.belek.ui.theme.BelekTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kriscg.belek.ui.viewModel.DetailsViewModel
 import coil.compose.AsyncImage
@@ -455,6 +453,12 @@ fun DescriptionContent(
     descripcion: String,
     precio: String?
 ) {
+    val context = LocalContext.current
+    val preferencesManager = remember {
+        com.kriscg.belek.data.userpreferences.PreferencesManager.getInstance(context)
+    }
+    val preferences by preferencesManager.preferencesFlow.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -482,12 +486,50 @@ fun DescriptionContent(
                 style = MaterialTheme.typography.titleSmall
             )
             Text(
-                text = precio,
+                text = convertCurrency(precio, preferences.currency),
                 fontWeight = FontWeight.Normal,
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelMedium
             )
         }
+    }
+}
+
+// Función para convertir moneda
+private fun convertCurrency(precio: String, targetCurrency: String): String {
+    // Tasa de conversión aproximada Q7.8 = $1
+    val conversionRate = 7.8
+
+    return try {
+        // Extraer números del precio
+        val numbers = precio.replace(Regex("[^0-9.]"), "").toDoubleOrNull()
+
+        if (numbers != null) {
+            when {
+                precio.contains("Q") && targetCurrency == "$" -> {
+                    val converted = numbers / conversionRate
+                    precio.replace(Regex("Q\\s*[0-9.]+"), "%.2f".format(converted))
+                }
+                precio.contains("$") && targetCurrency == "Q" -> {
+                    val converted = numbers * conversionRate
+                    precio.replace(Regex("\\$\\s*[0-9.]+"), "Q${"%.2f".format(converted)}")
+                }
+                !precio.contains("Q") && !precio.contains("$") -> {
+                    // Si no tiene símbolo, asumir que está en Q y convertir según preferencia
+                    if (targetCurrency == "$") {
+                        val converted = numbers / conversionRate
+                        "%.2f".format(converted)
+                    } else {
+                        "Q$precio"
+                    }
+                }
+                else -> precio
+            }
+        } else {
+            precio
+        }
+    } catch (_: Exception) {
+        precio
     }
 }
 
@@ -551,6 +593,12 @@ fun GoogleMapView(
 fun RatingsContent(
     resenas: List<Resena>
 ) {
+    val context = LocalContext.current
+    val preferencesManager = remember {
+        com.kriscg.belek.data.userpreferences.PreferencesManager.getInstance(context)
+    }
+    val preferences by preferencesManager.preferencesFlow.collectAsState()
+
     if (resenas.isEmpty()) {
         Box(
             modifier = Modifier
@@ -605,7 +653,11 @@ fun RatingsContent(
                             }
                             Column {
                                 Text(
-                                    text = "Usuario ${resena.usuarioId.take(8)}",
+                                    text = if (preferences.isPublicInfoEnabled) {
+                                        "Usuario ${resena.usuarioId.take(8)}"
+                                    } else {
+                                        "Usuario Anónimo"
+                                    },
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -655,15 +707,7 @@ private fun formatDate(dateString: String): String {
         val outputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val date = inputFormat.parse(dateString)
         outputFormat.format(date ?: Date())
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         dateString
-    }
-}
-
-@Preview
-@Composable
-fun PreviewDetailsScreen() {
-    BelekTheme {
-        DetailsScreen()
     }
 }

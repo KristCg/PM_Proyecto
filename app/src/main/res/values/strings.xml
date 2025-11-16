@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Belek</string>
 
+    <string name="usuario_anonimo">Usuario Anónimo</string>
     <!-- Login/Registro -->
     <string name="login">Login</string>
     <string name="registro">Registro</string>
@@ -139,4 +140,5 @@
     <string name="cargando">Cargando…</string>
     <string name="error_desconocido">Error desconocido</string>
     <string name="reintentar">Reintentar</string>
+
 </resources>

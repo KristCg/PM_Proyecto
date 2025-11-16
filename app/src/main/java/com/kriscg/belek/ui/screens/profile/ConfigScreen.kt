@@ -33,14 +33,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kriscg.belek.R
 import com.kriscg.belek.data.userpreferences.PreferencesManager
-import com.kriscg.belek.ui.theme.BelekTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,14 +52,13 @@ fun ConfigScreen(
 
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showCurrencyDialog by remember { mutableStateOf(false) }
-    var publicInfoEnabled by remember { mutableStateOf(true) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = context.getString(R.string.configuraciones),
+                        text = stringResource(R.string.configuraciones),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -69,7 +67,7 @@ fun ConfigScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.ChevronLeft,
-                            contentDescription = context.getString(R.string.regresar)
+                            contentDescription = stringResource(R.string.regresar)
                         )
                     }
                 }
@@ -82,6 +80,7 @@ fun ConfigScreen(
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Tema Oscuro
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -90,11 +89,11 @@ fun ConfigScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Star,
-                    contentDescription = context.getString(R.string.tema_oscuro),
+                    contentDescription = stringResource(R.string.tema_oscuro),
                     modifier = Modifier.padding(end = 16.dp)
                 )
                 Text(
-                    text = context.getString(R.string.tema_oscuro),
+                    text = stringResource(R.string.tema_oscuro),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f)
                 )
@@ -105,25 +104,27 @@ fun ConfigScreen(
             }
             HorizontalDivider(modifier = Modifier.fillMaxWidth(0.9f).padding(vertical = 16.dp))
 
+            // Cambiar Idioma
             CajonesContentClickable(
                 icono = Icons.Default.Face,
-                opcion = context.getString(R.string.cambiar_idioma),
+                opcion = stringResource(R.string.cambiar_idioma),
                 valorActual = preferences.languageDisplay,
                 onClick = { showLanguageDialog = true }
             )
             HorizontalDivider(modifier = Modifier.fillMaxWidth(0.9f).padding(vertical = 16.dp))
 
+            // Moneda de cambio
             CajonesContentClickable(
                 icono = Icons.Default.Settings,
-                opcion = context.getString(R.string.moneda_cambio),
-                valorActual = preferences.currency,
+                opcion = stringResource(R.string.moneda_cambio),
+                valorActual = getCurrencyDisplay(preferences.currency),
                 onClick = { showCurrencyDialog = true }
             )
-
             HorizontalDivider(modifier = Modifier.fillMaxWidth(0.9f).padding(vertical = 16.dp))
 
+            // Privacidad
             Text(
-                text = context.getString(R.string.privacidad),
+                text = stringResource(R.string.privacidad),
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
@@ -133,6 +134,7 @@ fun ConfigScreen(
                 fontSize = 20.sp
             )
 
+            // Info Pública
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -141,31 +143,32 @@ fun ConfigScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
-                    contentDescription = context.getString(R.string.info_publica),
+                    contentDescription = stringResource(R.string.info_publica),
                     modifier = Modifier.padding(end = 16.dp)
                 )
                 Text(
-                    text = context.getString(R.string.info_publica),
+                    text = stringResource(R.string.info_publica),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f)
                 )
                 Switch(
-                    checked = publicInfoEnabled,
-                    onCheckedChange = { publicInfoEnabled = it }
+                    checked = preferences.isPublicInfoEnabled,
+                    onCheckedChange = { preferencesManager.setPublicInfo(it) }
                 )
             }
             HorizontalDivider(modifier = Modifier.fillMaxWidth(0.9f).padding(vertical = 16.dp))
         }
     }
 
+    // Dialog de idioma
     if (showLanguageDialog) {
         val languages = listOf(
-            context.getString(R.string.idioma_espanol),
-            context.getString(R.string.idioma_ingles)
+            stringResource(R.string.idioma_espanol),
+            stringResource(R.string.idioma_ingles)
         )
 
         SelectionDialog(
-            title = context.getString(R.string.seleccionar_idioma),
+            title = stringResource(R.string.seleccionar_idioma),
             options = languages,
             currentSelection = preferences.languageDisplay,
             onDismiss = { showLanguageDialog = false },
@@ -173,28 +176,42 @@ fun ConfigScreen(
                 val code = preferencesManager.getLanguageCode(displayName)
                 preferencesManager.setLanguage(code, displayName)
                 showLanguageDialog = false
-
                 (context as? ComponentActivity)?.recreate()
             }
         )
     }
 
+    // Dialog de moneda
     if (showCurrencyDialog) {
-        val currencies = listOf(
-            context.getString(R.string.moneda_quetzales),
-            context.getString(R.string.moneda_dolares)
-        )
+        val currencies = listOf("Q", "$")
 
         SelectionDialog(
-            title = context.getString(R.string.seleccionar_moneda),
-            options = currencies,
-            currentSelection = preferences.currency,
+            title = stringResource(R.string.seleccionar_moneda),
+            options = currencies.map { getCurrencyDisplay(it) },
+            currentSelection = getCurrencyDisplay(preferences.currency),
             onDismiss = { showCurrencyDialog = false },
-            onSelect = { currency ->
-                preferencesManager.setCurrency(currency)
+            onSelect = { display ->
+                val symbol = when {
+                    display.contains("Quetzales") -> "Q"
+                    display.contains("Dollars") || display.contains("Dólares") -> "$"
+                    else -> "Q"
+                }
+                preferencesManager.setCurrency(symbol)
                 showCurrencyDialog = false
             }
         )
+    }
+}
+
+@Composable
+private fun getCurrencyDisplay(symbol: String): String {
+    val context = LocalContext.current
+    val currentLanguage = PreferencesManager.getInstance(context).preferencesFlow.collectAsState().value.language
+
+    return when (symbol) {
+        "Q" -> if (currentLanguage == "en") "Quetzales (Q)" else "Quetzales (Q)"
+        "$" -> if (currentLanguage == "en") "Dollars ($)" else "Dólares ($)"
+        else -> "Quetzales (Q)"
     }
 }
 
@@ -297,16 +314,8 @@ fun SelectionDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancelar))
             }
         }
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ConfigScreenPreview() {
-    BelekTheme {
-        ConfigScreen()
-    }
 }

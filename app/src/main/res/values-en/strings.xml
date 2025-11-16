@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Belek</string>
 
+    <string name="usuario_anonimo">Anonymous User</string>
     <!-- Login/Register -->
     <string name="login">Login</string>
     <string name="registro">Register</string>

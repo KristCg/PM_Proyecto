@@ -41,7 +41,7 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
 
     override fun attachBaseContext(newBase: Context) {
-        val sharedPreferences = newBase.getSharedPreferences("belek_preferences", Context.MODE_PRIVATE)
+        val sharedPreferences = newBase.getSharedPreferences("belek_preferences", MODE_PRIVATE)
         val languageCode = sharedPreferences.getString("language", "es") ?: "es"
 
         val context = updateLocale(newBase, languageCode)
@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun updateLocale(context: Context, languageCode: String): Context {
-        val locale = Locale(languageCode)
+        val locale = Locale.Builder().setLanguage(languageCode).build()
         Locale.setDefault(locale)
 
         val config = Configuration(context.resources.configuration)
