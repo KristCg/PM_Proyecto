@@ -407,6 +407,7 @@ fun HomeScreen(
     onNuevoViajeClick: () -> Unit = {},
     onLugarClick: (Int) -> Unit = {},
     onMenuItemClick: (MenuOption) -> Unit = {},
+    onNavigateToCalendar: () -> Unit =  {},
     viewModel: HomeViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -485,7 +486,7 @@ fun HomeScreen(
                     if (uiState.selectedTab == 0) {
                         FloatingMenuButton(
                             onNuevoViaje = onNuevoViajeClick,
-                            onCalendario = {}
+                            onCalendario = onNavigateToCalendar
                         )
                     }
                 }

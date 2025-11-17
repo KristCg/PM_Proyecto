@@ -17,6 +17,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.kriscg.belek.data.repository.AuthRepository
+import com.kriscg.belek.ui.navigation.calendar.Calendar
+import com.kriscg.belek.ui.navigation.calendar.EventDetail
+import com.kriscg.belek.ui.navigation.calendar.calendarNavigation
 import com.kriscg.belek.ui.theme.BelekTheme
 import com.kriscg.belek.ui.navigation.login.AuthGraph
 import com.kriscg.belek.ui.navigation.login.Registro
@@ -36,6 +39,7 @@ import com.kriscg.belek.ui.navigation.profile.profileNavigation
 import com.kriscg.belek.ui.navigation.config.configNavigation
 import com.kriscg.belek.ui.navigation.login.Login
 import com.kriscg.belek.ui.navigation.profile.editProfileNavigation
+import com.kriscg.belek.ui.navigation.calendar.calendarNavigation
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
@@ -162,7 +166,13 @@ fun AppNavigation() {
                     popUpTo(0) { inclusive = true }
                     launchSingleTop = true
                 }
+            },
+            onNavigateToCalendar = {
+                navController.navigate(Calendar) {
+                    launchSingleTop = true
+                }
             }
+
         )
 
         encuestaNavigation(
@@ -226,6 +236,16 @@ fun AppNavigation() {
         )
 
         editProfileNavigation(
+            onNavigateBack = {
+                navController.navigateUp()
+            }
+        )
+        calendarNavigation(
+            onNavigateToEventDetail = { eventId ->
+                navController.navigate(EventDetail(eventId = eventId)) {
+                    launchSingleTop = true
+                }
+            },
             onNavigateBack = {
                 navController.navigateUp()
             }

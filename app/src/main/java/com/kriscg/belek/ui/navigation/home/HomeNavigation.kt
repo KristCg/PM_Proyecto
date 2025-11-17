@@ -1,5 +1,6 @@
 package com.kriscg.belek.ui.navigation.home
 
+import android.icu.util.Calendar
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
@@ -16,6 +17,7 @@ fun NavGraphBuilder.homeNavigation(
     onNavigateToDetails: (Int) -> Unit,
     onNavigateToProfile: () -> Unit,
     onToConfig: () -> Unit,
+    onNavigateToCalendar: () -> Unit,
     onLogout: () -> Unit
 ) {
     composable<Home> {
@@ -24,6 +26,7 @@ fun NavGraphBuilder.homeNavigation(
         HomeScreen(
             onNuevoViajeClick = onNavigateToEncuesta,
             onLugarClick = onNavigateToDetails,
+            onNavigateToCalendar = onNavigateToCalendar,
             onMenuItemClick = { menuOption ->
                 when (menuOption) {
                     MenuOption.VIEW_PROFILE -> onNavigateToProfile()
