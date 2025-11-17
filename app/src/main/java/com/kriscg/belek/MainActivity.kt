@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         com.kriscg.belek.data.SupabaseConfig.initialize(applicationContext)
-        com.kriscg.belek.data.SupabaseConfig.initialize(applicationContext)
+        com.kriscg.belek.data.local.LocalDatabase.initialize(applicationContext)
 
 
         enableEdgeToEdge()
