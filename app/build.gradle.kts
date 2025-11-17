@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.ksp)
+
 }
 
 android {
@@ -40,6 +42,10 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+ksp{
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -83,6 +89,10 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation(libs.google.maps.compose)
     implementation(libs.play.services.location)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
 
 
 }

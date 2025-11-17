@@ -1,0 +1,135 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "e9da5a5233a29c94f1e805c89a1efe2f",
+    "entities": [
+      {
+        "tableName": "lugares",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `nombre` TEXT NOT NULL, `descripcion` TEXT NOT NULL, `ubicacion` TEXT NOT NULL, `horario` TEXT, `tipo` TEXT NOT NULL, `ambiente` TEXT, `servicios` TEXT, `precio` TEXT, `precioEn` TEXT, `calificacion` REAL, `imagenUrl` TEXT, `createdAt` TEXT, `momentoDia` TEXT, `rangoPrecio` TEXT, `coordenadas` TEXT, `departamento` TEXT, `latitud` REAL, `longitud` REAL, `nombreEn` TEXT, `descripcionEn` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descripcion",
+            "columnName": "descripcion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ubicacion",
+            "columnName": "ubicacion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "horario",
+            "columnName": "horario",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ambiente",
+            "columnName": "ambiente",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "servicios",
+            "columnName": "servicios",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "precio",
+            "columnName": "precio",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "precioEn",
+            "columnName": "precioEn",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "calificacion",
+            "columnName": "calificacion",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "imagenUrl",
+            "columnName": "imagenUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "momentoDia",
+            "columnName": "momentoDia",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rangoPrecio",
+            "columnName": "rangoPrecio",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "coordenadas",
+            "columnName": "coordenadas",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "departamento",
+            "columnName": "departamento",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "latitud",
+            "columnName": "latitud",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "longitud",
+            "columnName": "longitud",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "nombreEn",
+            "columnName": "nombreEn",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "descripcionEn",
+            "columnName": "descripcionEn",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e9da5a5233a29c94f1e805c89a1efe2f')"
+    ]
+  }
+}
