@@ -46,11 +46,10 @@ import com.google.maps.android.compose.rememberMarkerState
 import coil.compose.AsyncImage
 import com.kriscg.belek.rememberUserLocation
 import com.kriscg.belek.ui.screens.details.GoogleMapView
+import com.kriscg.belek.ui.viewModel.MainProfileViewModel
 
 enum class MenuOption {
     VIEW_PROFILE,
-    ADD_ACCOUNT,
-    HISTORY,
     SETTINGS,
     LOGOUT
 }
@@ -298,8 +297,11 @@ fun MapContent(
 @Composable
 fun ProfileDrawerContent(
     onMenuItemClick: (MenuOption) -> Unit = {},
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    viewModel: MainProfileViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -328,7 +330,7 @@ fun ProfileDrawerContent(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = stringResource(R.string.nombre_usuario),
+                    text = uiState.usuario?.username ?: stringResource(R.string.nombre_usuario),
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
@@ -350,8 +352,6 @@ fun ProfileDrawerContent(
 
         val menuItems = listOf(
             Triple(stringResource(R.string.ver_perfil), Icons.Default.AccountCircle, MenuOption.VIEW_PROFILE),
-            Triple(stringResource(R.string.agregar_cuenta), Icons.Default.Add, MenuOption.ADD_ACCOUNT),
-            Triple(stringResource(R.string.historial), Icons.Default.Menu, MenuOption.HISTORY),
             Triple(stringResource(R.string.configuracion_privacidad), Icons.Default.Settings, MenuOption.SETTINGS),
             Triple(stringResource(R.string.cerrar_sesion), Icons.AutoMirrored.Filled.KeyboardArrowLeft, MenuOption.LOGOUT),
         )

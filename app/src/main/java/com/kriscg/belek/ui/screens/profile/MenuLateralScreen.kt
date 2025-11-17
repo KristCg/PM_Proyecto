@@ -66,8 +66,6 @@ fun ProfileDrawer(
     val menuItems = listOf(
         MenuItem("Nombre de Usuario", Icons.Default.Person, isHeader = true),
         MenuItem("Ver perfil", Icons.Default.AccountCircle),
-        MenuItem("Agregar otra cuenta", Icons.Default.Add, showDivider = true),
-        MenuItem("Historial", Icons.Default.Menu),
         MenuItem("Configuración y privacidad", Icons.Default.Settings, showDivider = true),
         MenuItem("Cerrar Sesión", Icons.Default.ExitToApp),
     )
@@ -229,8 +227,6 @@ fun SimpleProfileMenu(
     val menuItems = listOf(
         "Nombre de Usuario" to Icons.Default.Person,
         "Ver perfil" to Icons.Default.AccountCircle,
-        "Agregar otra cuenta" to Icons.Default.Add,
-        "Historial" to Icons.Default.Menu,
         "Configuración y privacidad" to Icons.Default.Settings,
         "Cerrar Sesión" to Icons.Default.ExitToApp,
     )

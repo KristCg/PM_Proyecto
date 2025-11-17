@@ -30,10 +30,6 @@ fun NavGraphBuilder.homeNavigation(
             onMenuItemClick = { menuOption ->
                 when (menuOption) {
                     MenuOption.VIEW_PROFILE -> onNavigateToProfile()
-                    MenuOption.ADD_ACCOUNT -> {
-                    }
-                    MenuOption.HISTORY -> {
-                    }
                     MenuOption.SETTINGS -> onToConfig()
                     MenuOption.LOGOUT -> {
                         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {

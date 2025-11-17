@@ -103,7 +103,7 @@ fun LoginScreen(
             Button(
                 onClick = { viewModel.login() },
                 modifier = Modifier
-                    .width(150.dp)
+                    .width(160.dp)
                     .height(50.dp),
                 shape = RoundedCornerShape(30.dp),
                 colors = ButtonDefaults.buttonColors(
