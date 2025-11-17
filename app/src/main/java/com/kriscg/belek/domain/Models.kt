@@ -70,3 +70,25 @@ data class Viaje(
     @SerialName("created_at")
     val createdAt: String? = null
 )
+
+@Serializable
+data class Favorito(
+    val id: Int? = null,
+    @SerialName("usuario_id")
+    val usuarioId: String,
+    @SerialName("lugar_id")
+    val lugarId: Int,
+    @SerialName("created_at")
+    val createdAt: String? = null
+)
+
+@Serializable
+data class Guardado(
+    val id: Int? = null,
+    @SerialName("usuario_id")
+    val usuarioId: String,
+    @SerialName("lugar_id")
+    val lugarId: Int,
+    @SerialName("created_at")
+    val createdAt: String? = null
+)

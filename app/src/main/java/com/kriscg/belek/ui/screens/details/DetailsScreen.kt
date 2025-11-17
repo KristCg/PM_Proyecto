@@ -1,6 +1,6 @@
 package com.kriscg.belek.ui.screens.details
 
-import com.kriscg.belek.R
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,9 +40,11 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import com.kriscg.belek.R
 import com.kriscg.belek.domain.Lugar
 import com.kriscg.belek.domain.Resena
 import com.kriscg.belek.util.TranslationHelper
+import androidx.core.net.toUri
 
 @Composable
 fun CustomTabs(
@@ -108,6 +110,7 @@ fun DetailsScreen(
     }
     val preferences by preferencesManager.preferencesFlow.collectAsState()
     val currentLanguage = preferences.language
+    val currentCurrency = preferences.currency
 
     LaunchedEffect(lugarId) {
         viewModel.loadLugarDetails(lugarId)
@@ -185,7 +188,6 @@ fun DetailsScreen(
             val lugar = uiState.lugar!!
             val nombreTraducido = TranslationHelper.getLugarNombre(lugar, currentLanguage)
             val descripcionTraducida = TranslationHelper.getLugarDescripcion(lugar, currentLanguage)
-            val precioTraducido = if (currentLanguage == "en") lugar.precioEn else lugar.precio
 
             Column(
                 modifier = Modifier
@@ -223,23 +225,76 @@ fun DetailsScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp)
                 ) {
-                    Text(
-                        text = nombreTraducido,
-                        fontWeight = FontWeight.SemiBold,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = nombreTraducido,
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            IconButton(onClick = { viewModel.toggleFavorito() }) {
+                                Icon(
+                                    imageVector = if (uiState.isFavorito)
+                                        Icons.Default.Favorite
+                                    else
+                                        Icons.Default.FavoriteBorder,
+                                    contentDescription = stringResource(R.string.favoritos),
+                                    tint = if (uiState.isFavorito)
+                                        Color.Red
+                                    else
+                                        MaterialTheme.colorScheme.primary
+                                )
+                            }
+
+                            IconButton(onClick = { viewModel.toggleGuardado() }) {
+                                Icon(
+                                    imageVector = if (uiState.isGuardado)
+                                        Icons.Default.Bookmark
+                                    else
+                                        Icons.Default.BookmarkBorder,
+                                    contentDescription = stringResource(R.string.guardados),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                val lat = lugar.latitud
+                                val lng = lugar.longitud
+                                if (lat != null && lng != null) {
+                                    val uri = "geo:$lat,$lng?q=$lat,$lng(${lugar.nombre})".toUri()
+                                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                                    intent.setPackage("com.google.android.apps.maps")
+
+                                    if (intent.resolveActivity(context.packageManager) != null) {
+                                        context.startActivity(intent)
+                                    } else {
+                                        val browserUri =
+                                            "https://www.google.com/maps/search/?api=1&query=$lat,$lng".toUri()
+                                        context.startActivity(Intent(Intent.ACTION_VIEW, browserUri))
+                                    }
+                                }
+                            },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Place,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.abrir_mapa),
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
@@ -283,8 +338,10 @@ fun DetailsScreen(
 
                 when (uiState.selectedTab) {
                     0 -> DescriptionContent(
+                        lugar = lugar,
                         descripcion = descripcionTraducida,
-                        precio = precioTraducido
+                        currentLanguage = currentLanguage,
+                        currency = currentCurrency
                     )
                     1 -> MapContent(lugar = lugar)
                     2 -> RatingsContent(resenas = uiState.resenas)
@@ -450,14 +507,28 @@ fun AddReviewDialog(
 
 @Composable
 fun DescriptionContent(
+    lugar: Lugar,
     descripcion: String,
-    precio: String?
+    currentLanguage: String,
+    currency: String
 ) {
-    val context = LocalContext.current
-    val preferencesManager = remember {
-        com.kriscg.belek.data.userpreferences.PreferencesManager.getInstance(context)
+    val precioEnIdiomaActual = if (currentLanguage == "en") {
+        lugar.precioEn ?: lugar.precio
+    } else {
+        lugar.precio
     }
-    val preferences by preferencesManager.preferencesFlow.collectAsState()
+
+    LaunchedEffect(precioEnIdiomaActual, currency) {
+        println("=== DEBUG PRECIO ===")
+        println("Precio original (idioma $currentLanguage): $precioEnIdiomaActual")
+        println("Moneda objetivo: $currency")
+    }
+
+    val precioFinal = precioEnIdiomaActual?.let {
+        val converted = convertCurrency(it, currency)
+        println("Precio convertido: $converted")
+        converted
+    }
 
     Column(
         modifier = Modifier
@@ -477,7 +548,7 @@ fun DescriptionContent(
             style = MaterialTheme.typography.labelMedium
         )
 
-        if (precio != null) {
+        if (precioFinal != null) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.precios),
@@ -486,7 +557,7 @@ fun DescriptionContent(
                 style = MaterialTheme.typography.titleSmall
             )
             Text(
-                text = convertCurrency(precio, preferences.currency),
+                text = precioFinal,
                 fontWeight = FontWeight.Normal,
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelMedium
@@ -495,38 +566,63 @@ fun DescriptionContent(
     }
 }
 
-// Función para convertir moneda
 private fun convertCurrency(precio: String, targetCurrency: String): String {
-    // Tasa de conversión aproximada Q7.8 = $1
+    if (precio.contains("Gratuito", ignoreCase = true) ||
+        precio.contains("Free", ignoreCase = true) ||
+        precio.contains("Gratis", ignoreCase = true)) {
+        return precio
+    }
+
     val conversionRate = 7.8
 
     return try {
-        // Extraer números del precio
-        val numbers = precio.replace(Regex("[^0-9.]"), "").toDoubleOrNull()
+        when {
+            precio.contains("Q", ignoreCase = true) && targetCurrency == "$" -> {
+                precio.replace(Regex("Q\\s*([0-9]+(?:\\.[0-9]+)?)")) { matchResult ->
+                    val number = matchResult.groupValues[1].toDoubleOrNull() ?: return@replace matchResult.value
+                    val converted = number / conversionRate
+                    "$%.2f".format(converted)
+                }
+            }
 
-        if (numbers != null) {
-            when {
-                precio.contains("Q") && targetCurrency == "$" -> {
-                    val converted = numbers / conversionRate
-                    precio.replace(Regex("Q\\s*[0-9.]+"), "%.2f".format(converted))
+            precio.contains("$") && targetCurrency == "Q" -> {
+                precio.replace(Regex("\\$\\s*([0-9]+(?:\\.[0-9]+)?)")) { matchResult ->
+                    val number = matchResult.groupValues[1].toDoubleOrNull() ?: return@replace matchResult.value
+                    val converted = number * conversionRate
+                    "Q%.2f".format(converted)
                 }
-                precio.contains("$") && targetCurrency == "Q" -> {
-                    val converted = numbers * conversionRate
-                    precio.replace(Regex("\\$\\s*[0-9.]+"), "Q${"%.2f".format(converted)}")
+            }
+
+            precio.contains("USD", ignoreCase = true) && targetCurrency == "Q" -> {
+                precio.replace(Regex("USD\\s*([0-9]+(?:\\.[0-9]+)?)", RegexOption.IGNORE_CASE)) { matchResult ->
+                    val number = matchResult.groupValues[1].toDoubleOrNull() ?: return@replace matchResult.value
+                    val converted = number * conversionRate
+                    "Q%.2f".format(converted)
                 }
-                !precio.contains("Q") && !precio.contains("$") -> {
-                    // Si no tiene símbolo, asumir que está en Q y convertir según preferencia
-                    if (targetCurrency == "$") {
-                        val converted = numbers / conversionRate
-                        "%.2f".format(converted)
-                    } else {
-                        "Q$precio"
+            }
+
+            precio.contains("USD", ignoreCase = true) && targetCurrency == "$" -> {
+                precio.replace(Regex("USD\\s*([0-9]+(?:\\.[0-9]+)?)", RegexOption.IGNORE_CASE)) { matchResult ->
+                    val number = matchResult.groupValues[1]
+                    number
+                }
+            }
+
+            !precio.contains("Q") && !precio.contains("$") && !precio.contains("USD", ignoreCase = true) -> {
+                if (targetCurrency == "$") {
+                    precio.replace(Regex("([0-9]+(?:\\.[0-9]+)?)")) { matchResult ->
+                        val number = matchResult.value.toDoubleOrNull() ?: return@replace matchResult.value
+                        val converted = number / conversionRate
+                        "$%.2f".format(converted)
+                    }
+                } else {
+                    precio.replace(Regex("([0-9]+(?:\\.[0-9]+)?)")) { matchResult ->
+                        "Q${matchResult.value}"
                     }
                 }
-                else -> precio
             }
-        } else {
-            precio
+
+            else -> precio
         }
     } catch (_: Exception) {
         precio
@@ -599,6 +695,26 @@ fun RatingsContent(
     }
     val preferences by preferencesManager.preferencesFlow.collectAsState()
 
+    val usuariosRepository = remember { com.kriscg.belek.data.repository.UsuariosRepository() }
+    var usernames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+
+    LaunchedEffect(resenas) {
+        val userIds = resenas.map { it.usuarioId }.distinct()
+        val usernamesMap = mutableMapOf<String, String>()
+
+        userIds.forEach { userId ->
+            usuariosRepository.getUsuarioById(userId)
+                .onSuccess { usuario ->
+                    usernamesMap[userId] = usuario.username
+                }
+                .onFailure {
+                    usernamesMap[userId] = "Usuario ${userId.take(8)}"
+                }
+        }
+
+        usernames = usernamesMap
+    }
+
     if (resenas.isEmpty()) {
         Box(
             modifier = Modifier
@@ -654,9 +770,9 @@ fun RatingsContent(
                             Column {
                                 Text(
                                     text = if (preferences.isPublicInfoEnabled) {
-                                        "Usuario ${resena.usuarioId.take(8)}"
+                                        usernames[resena.usuarioId] ?: "Usuario ${resena.usuarioId.take(8)}"
                                     } else {
-                                        "Usuario Anónimo"
+                                        stringResource(R.string.usuario_anonimo)
                                     },
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.bodyLarge,

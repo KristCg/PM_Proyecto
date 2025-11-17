@@ -104,6 +104,7 @@
     <string name="cerrar">Close</string>
     <string name="no_resenas">No reviews yet</string>
     <string name="agregar_resena">Add review</string>
+    <string name="abrir_mapa">Open in Google Maps</string>
 
     <!-- Profile -->
     <string name="perfil">Profile</string>
@@ -111,6 +112,22 @@
     <string name="favoritos">Favorites</string>
     <string name="guardados">Saved</string>
     <string name="resenas">Reviews</string>
+
+    <string name="no_favoritos">You have no favorite places yet</string>
+    <string name="no_guardados">You have no saved places yet</string>
+    <string name="no_resenas_usuario">You have not written any reviews yet</string>
+    <string name="eliminar">Delete</string>
+    <string name="lugar_desconocido">Unknown place</string>
+
+    <string name="editar">Edit</string>
+    <string name="guardar">Save</string>
+    <string name="descripcion_perfil">Description</string>
+    <string name="sin_descripcion">No description</string>
+    <string name="nueva_contrasena">New password</string>
+    <string name="confirmar_contrasena">Confirm password</string>
+    <string name="actualizado_exitosamente">Updated successfully</string>
+
+    <string name="imagen_perfil">Profile picture</string>
 
     <!-- Settings -->
     <string name="configuraciones">Settings</string>

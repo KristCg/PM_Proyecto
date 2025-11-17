@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kriscg.belek.domain.Lugar
 import com.kriscg.belek.domain.Resena
+import com.kriscg.belek.domain.Favorito
+import com.kriscg.belek.domain.Guardado
 import com.kriscg.belek.data.repository.AuthRepository
 import com.kriscg.belek.data.repository.LugaresRepository
+import com.kriscg.belek.data.repository.FavoritosRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,12 +22,15 @@ data class DetailsUiState(
     val error: String? = null,
     val showReviewDialog: Boolean = false,
     val isSubmittingReview: Boolean = false,
-    val reviewSubmitted: Boolean = false
+    val reviewSubmitted: Boolean = false,
+    val isFavorito: Boolean = false,
+    val isGuardado: Boolean = false
 )
 
 class DetailsViewModel(
     private val lugaresRepository: LugaresRepository = LugaresRepository(),
-    private val authRepository: AuthRepository = AuthRepository()
+    private val authRepository: AuthRepository = AuthRepository(),
+    private val favoritosRepository: FavoritosRepository = FavoritosRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DetailsUiState())
@@ -41,6 +47,8 @@ class DetailsViewModel(
                         isLoading = false
                     )
                     loadResenas(lugarId)
+                    checkFavoritoStatus(lugarId)
+                    checkGuardadoStatus(lugarId)
                 }
                 .onFailure { exception ->
                     _uiState.value = _uiState.value.copy(
@@ -60,6 +68,94 @@ class DetailsViewModel(
                 .onFailure { exception ->
                     println("Error al cargar reseñas: ${exception.message}")
                 }
+        }
+    }
+
+    private fun checkFavoritoStatus(lugarId: Int) {
+        val userId = authRepository.getCurrentUserId() ?: return
+
+        viewModelScope.launch {
+            favoritosRepository.isFavorito(userId, lugarId)
+                .onSuccess { isFav ->
+                    _uiState.value = _uiState.value.copy(isFavorito = isFav)
+                }
+                .onFailure {
+                    println("Error al verificar favorito: ${it.message}")
+                }
+        }
+    }
+
+    private fun checkGuardadoStatus(lugarId: Int) {
+        val userId = authRepository.getCurrentUserId() ?: return
+
+        viewModelScope.launch {
+            favoritosRepository.isGuardado(userId, lugarId)
+                .onSuccess { isGuard ->
+                    _uiState.value = _uiState.value.copy(isGuardado = isGuard)
+                }
+                .onFailure {
+                    println("Error al verificar guardado: ${it.message}")
+                }
+        }
+    }
+
+    fun toggleFavorito() {
+        val lugar = _uiState.value.lugar ?: return
+        val userId = authRepository.getCurrentUserId() ?: return
+        val isFavorito = _uiState.value.isFavorito
+
+        viewModelScope.launch {
+            if (isFavorito) {
+                favoritosRepository.removeFavorito(userId, lugar.id ?: 0)
+                    .onSuccess {
+                        _uiState.value = _uiState.value.copy(isFavorito = false)
+                    }
+                    .onFailure {
+                        println("Error al quitar favorito: ${it.message}")
+                    }
+            } else {
+                val favorito = Favorito(
+                    usuarioId = userId,
+                    lugarId = lugar.id ?: 0
+                )
+                favoritosRepository.addFavorito(favorito)
+                    .onSuccess {
+                        _uiState.value = _uiState.value.copy(isFavorito = true)
+                    }
+                    .onFailure {
+                        println("Error al agregar favorito: ${it.message}")
+                    }
+            }
+        }
+    }
+
+    fun toggleGuardado() {
+        val lugar = _uiState.value.lugar ?: return
+        val userId = authRepository.getCurrentUserId() ?: return
+        val isGuardado = _uiState.value.isGuardado
+
+        viewModelScope.launch {
+            if (isGuardado) {
+                favoritosRepository.removeGuardado(userId, lugar.id ?: 0)
+                    .onSuccess {
+                        _uiState.value = _uiState.value.copy(isGuardado = false)
+                    }
+                    .onFailure {
+                        println("Error al quitar guardado: ${it.message}")
+                    }
+            } else {
+                val guardado = Guardado(
+                    usuarioId = userId,
+                    lugarId = lugar.id ?: 0
+                )
+                favoritosRepository.addGuardado(guardado)
+                    .onSuccess {
+                        _uiState.value = _uiState.value.copy(isGuardado = true)
+                    }
+                    .onFailure {
+                        println("Error al agregar guardado: ${it.message}")
+                    }
+            }
         }
     }
 
@@ -114,9 +210,5 @@ class DetailsViewModel(
                     )
                 }
         }
-    }
-
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
     }
 }

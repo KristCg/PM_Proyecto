@@ -184,7 +184,4 @@ class ProfileViewModel(
         _uiState.value = _uiState.value.copy(updateSuccess = false)
     }
 
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
-    }
 }

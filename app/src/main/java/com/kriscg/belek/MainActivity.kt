@@ -210,6 +210,11 @@ fun AppNavigation() {
                 navController.navigate(EditProfile) {
                     launchSingleTop = true
                 }
+            },
+            onNavigateToDetails = { lugarId ->
+                navController.navigate(Details(lugarId = lugarId)) {
+                    launchSingleTop = true
+                }
             }
         )
 

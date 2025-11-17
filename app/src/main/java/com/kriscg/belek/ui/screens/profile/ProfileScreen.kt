@@ -1,51 +1,61 @@
-package com.kriscg.belek.Screens.Profile
+package com.kriscg.belek.ui.screens.profile
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Star
-import com.kriscg.belek.R
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kriscg.belek.ui.theme.BelekTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.kriscg.belek.R
+import com.kriscg.belek.ui.viewModel.MainProfileViewModel
+import com.kriscg.belek.domain.Lugar
+import com.kriscg.belek.domain.Resena
+import com.kriscg.belek.util.TranslationHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onEditProfileClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onLugarClick: (Int) -> Unit = {},
+    viewModel: MainProfileViewModel = viewModel()
 ) {
-    var selectedIndex by remember { mutableStateOf(0) }
+    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val preferencesManager = remember {
+        com.kriscg.belek.data.userpreferences.PreferencesManager.getInstance(context)
+    }
+    val preferences by preferencesManager.preferencesFlow.collectAsState()
 
-    val favoritos = listOf("Lugar 1", "Lugar 2", "Lugar 3")
-    val guardados = listOf("Artículo 1", "Artículo 2")
-    val reseñas = listOf("Reseña A", "Reseña B", "Reseña C", "Reseña D")
+    LaunchedEffect(Unit) {
+        viewModel.refreshProfile()
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Perfil",
+                        text = stringResource(R.string.perfil),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -53,8 +63,8 @@ fun ProfileScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Regresar"
+                            imageVector = Icons.Default.ChevronLeft,
+                            contentDescription = stringResource(R.string.volver)
                         )
                     }
                 },
@@ -62,157 +72,139 @@ fun ProfileScreen(
                     IconButton(onClick = onEditProfileClick) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar perfil"
+                            contentDescription = stringResource(R.string.editar_perfil)
                         )
                     }
                 }
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
+        if (uiState.isLoading) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Foto de Perfil",
-                    modifier = Modifier.size(125.dp)
-                )
-                Column(
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Text(
-                        text = "Nombre de Usuario",
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed."
-                    )
-                }
+                CircularProgressIndicator()
             }
-
-            HorizontalDivider(
+        } else {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(0.90F)
-                    .padding(10.dp)
-            )
-
-            SingleChoiceSegmentedButtonRow {
-                SegmentedButton(
-                    selected = selectedIndex == 0,
-                    onClick = { selectedIndex = 0 },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
-                    icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
-                    label = { Text("Favoritos") }
-                )
-
-                SegmentedButton(
-                    selected = selectedIndex == 1,
-                    onClick = { selectedIndex = 1 },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
-                    icon = { Icon(Icons.Default.Done, contentDescription = null) },
-                    label = { Text("Guardados") }
-                )
-
-                SegmentedButton(
-                    selected = selectedIndex == 2,
-                    onClick = { selectedIndex = 2 },
-                    shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
-                    icon = { Icon(Icons.Default.Star, contentDescription = null) },
-                    label = { Text("Reseñas") }
-                )
-            }
-            when (selectedIndex) {
-                0 -> FavoritosContent(favoritos)
-                1 -> GuardadosContent(guardados)
-                2 -> ReseñasContent(reseñas)
-            }
-        }
-    }
-}
-
-@Composable
-fun FavoritosContent(favoritos: List<String>) {
-    ContenidoLista(
-        items = favoritos,
-        bordeColor = MaterialTheme.colorScheme.primary
-    )
-}
-
-@Composable
-fun GuardadosContent(guardados: List<String>) {
-    ContenidoLista(
-        items = guardados,
-        bordeColor = MaterialTheme.colorScheme.primary
-    )
-}
-
-@Composable
-fun ReseñasContent(reseñas: List<String>) {
-    Surface(
-        modifier = Modifier
-            .fillMaxSize(0.9f)
-            .padding(8.dp),
-        shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-
-        ) {
-            items(reseñas.size) { index ->
-                Column() {
-                    Text(
-                        text = reseñas[index],
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = stringResource(R.string.perfil),
+                        modifier = Modifier.size(125.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
-                    Text(
-                        text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                    )
-                    Row (
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "1 Star",
-                            tint = MaterialTheme.colorScheme.secondaryContainer
+                    Column(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .weight(1f)
+                    ) {
+                        Text(
+                            text = uiState.usuario?.username ?: stringResource(R.string.nombre_usuario),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium
                         )
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "1 Star",
-                            tint = MaterialTheme.colorScheme.secondaryContainer
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "1 Star",
-                            tint = MaterialTheme.colorScheme.secondaryContainer
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "1 Star",
-                            tint = MaterialTheme.colorScheme.secondaryContainer
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "1 Star",
-                            tint = MaterialTheme.colorScheme.tertiaryContainer
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = uiState.usuario?.descripcion
+                                ?: stringResource(R.string.sin_descripcion),
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    HorizontalDivider(modifier = Modifier.fillMaxWidth(1f),
-                        )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth(0.90F)
+                        .padding(10.dp)
+                )
+
+                SingleChoiceSegmentedButtonRow {
+                    SegmentedButton(
+                        selected = uiState.selectedTabIndex == 0,
+                        onClick = { viewModel.onTabSelected(0) },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+                        icon = {
+                            SegmentedButtonDefaults.Icon(active = uiState.selectedTabIndex == 0) {
+                                Icon(
+                                    Icons.Default.Favorite,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SegmentedButtonDefaults.IconSize)
+                                )
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.favoritos))
+                    }
+
+                    SegmentedButton(
+                        selected = uiState.selectedTabIndex == 1,
+                        onClick = { viewModel.onTabSelected(1) },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
+                        icon = {
+                            SegmentedButtonDefaults.Icon(active = uiState.selectedTabIndex == 1) {
+                                Icon(
+                                    Icons.Default.Bookmark,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SegmentedButtonDefaults.IconSize)
+                                )
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.guardados))
+                    }
+
+                    SegmentedButton(
+                        selected = uiState.selectedTabIndex == 2,
+                        onClick = { viewModel.onTabSelected(2) },
+                        shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+                        icon = {
+                            SegmentedButtonDefaults.Icon(active = uiState.selectedTabIndex == 2) {
+                                Icon(
+                                    Icons.Default.Star,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SegmentedButtonDefaults.IconSize)
+                                )
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.resenas))
+                    }
+                }
+
+                when (uiState.selectedTabIndex) {
+                    0 -> FavoritosContent(
+                        lugares = uiState.favoritos,
+                        onLugarClick = onLugarClick,
+                        currentLanguage = preferences.language
+                    )
+                    1 -> GuardadosContent(
+                        lugares = uiState.guardados,
+                        onLugarClick = onLugarClick,
+                        currentLanguage = preferences.language
+                    )
+                    2 -> ResenasContent(
+                        resenas = uiState.resenas,
+                        onLugarClick = onLugarClick,
+                        currentLanguage = preferences.language
+                    )
                 }
             }
         }
@@ -220,12 +212,152 @@ fun ReseñasContent(reseñas: List<String>) {
 }
 
 @Composable
-fun ContenidoLista(items: List<String>, bordeColor: Color) {
+fun FavoritosContent(
+    lugares: List<Lugar>,
+    onLugarClick: (Int) -> Unit,
+    currentLanguage: String
+) {
+    if (lugares.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.no_favoritos),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        ContenidoLista(
+            lugares = lugares,
+            bordeColor = MaterialTheme.colorScheme.primary,
+            onLugarClick = onLugarClick,
+            currentLanguage = currentLanguage,
+            showDeleteButton = false
+        )
+    }
+}
+
+@Composable
+fun GuardadosContent(
+    lugares: List<Lugar>,
+    onLugarClick: (Int) -> Unit,
+    currentLanguage: String
+) {
+    if (lugares.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.no_guardados),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        ContenidoLista(
+            lugares = lugares,
+            bordeColor = MaterialTheme.colorScheme.primary,
+            onLugarClick = onLugarClick,
+            currentLanguage = currentLanguage,
+            showDeleteButton = false
+        )
+    }
+}
+
+@Composable
+fun ResenasContent(
+    resenas: List<Pair<Resena, Lugar?>>,
+    onLugarClick: (Int) -> Unit,
+    currentLanguage: String
+) {
+    if (resenas.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.no_resenas_usuario),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize(0.9f)
+                .padding(8.dp),
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                items(resenas) { (resena, lugar) ->
+                    Column(
+                        modifier = Modifier.clickable {
+                            lugar?.id?.let { onLugarClick(it) }
+                        }
+                    ) {
+                        Text(
+                            text = lugar?.let { TranslationHelper.getLugarNombre(it, currentLanguage) }
+                                ?: stringResource(R.string.lugar_desconocido),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = resena.comentario,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Row(modifier = Modifier.fillMaxWidth()
+                            .padding(end = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            repeat(5) { index ->
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Star ${index + 1}",
+                                    tint = if (index < resena.calificacion)
+                                        MaterialTheme.colorScheme.secondaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.tertiaryContainer,
+                                    modifier = Modifier.size(20.dp)
+                                        .padding(end = 4.dp)
+                                )
+                            }
+                        }
+                        HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ContenidoLista(
+    lugares: List<Lugar>,
+    bordeColor: Color,
+    onLugarClick: (Int) -> Unit,
+    currentLanguage: String,
+    showDeleteButton: Boolean = false,
+    onRemove: ((Int) -> Unit)? = null
+) {
     Surface(
         modifier = Modifier
             .fillMaxSize(0.9f)
-            .padding(8.dp),
-        shape = RoundedCornerShape(20.dp),
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+        shape = RoundedCornerShape(16.dp),
         border = BorderStroke(2.dp, bordeColor),
     ) {
         LazyColumn(
@@ -233,50 +365,66 @@ fun ContenidoLista(items: List<String>, bordeColor: Color) {
                 .fillMaxSize()
                 .clip(RoundedCornerShape(16.dp))
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            items(items.size) { index ->
+            items(lugares) { lugar ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .clickable { lugar.id?.let { onLugarClick(it) } }
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = items[index],
+                            text = TranslationHelper.getLugarNombre(lugar, currentLanguage),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                            text = TranslationHelper.getLugarDescripcion(lugar, currentLanguage),
                             maxLines = 3,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
 
-                    Image(
-                        painter = painterResource(id = R.drawable.prueba_guardados_favoritos),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(RoundedCornerShape(30.dp))
-                    )
+                    if (lugar.imagenUrl != null) {
+                        AsyncImage(
+                            model = lugar.imagenUrl,
+                            contentDescription = lugar.nombre,
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(RoundedCornerShape(30.dp)),
+                            contentScale = ContentScale.Crop,
+                            error = painterResource(id = R.drawable.tikal_prueba)
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.tikal_prueba),
+                            contentDescription = lugar.nombre,
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(RoundedCornerShape(30.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    if (showDeleteButton && onRemove != null) {
+                        IconButton(onClick = { lugar.id?.let { onRemove(it) } }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.eliminar),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
                 }
-                HorizontalDivider(modifier = Modifier.fillMaxWidth(1f),
-                )
+                HorizontalDivider(modifier = Modifier.fillMaxWidth())
             }
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewProfileScreenContent() {
-    BelekTheme {
-        ProfileScreen(modifier = Modifier)
-    }
-}
-

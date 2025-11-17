@@ -23,6 +23,27 @@ class PreferencesManager private constructor(context: Context) {
     private val _preferencesFlow = MutableStateFlow(loadPreferences())
     val preferencesFlow: StateFlow<UserPreferences> = _preferencesFlow.asStateFlow()
 
+    private val preferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        when (key) {
+            KEY_CURRENCY -> {
+                _preferencesFlow.value = loadPreferences()
+            }
+            KEY_LANGUAGE -> {
+                _preferencesFlow.value = loadPreferences()
+            }
+            KEY_DARK_THEME -> {
+                _preferencesFlow.value = loadPreferences()
+            }
+            KEY_PUBLIC_INFO -> {
+                _preferencesFlow.value = loadPreferences()
+            }
+        }
+    }
+
+    init {
+        sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
+    }
+
     private fun loadPreferences(): UserPreferences {
         val languageCode = sharedPreferences.getString(KEY_LANGUAGE, "es") ?: "es"
         val currencyCode = sharedPreferences.getString(KEY_CURRENCY, "Q") ?: "Q"
@@ -36,12 +57,16 @@ class PreferencesManager private constructor(context: Context) {
     }
 
     fun setDarkTheme(isDark: Boolean) {
-        sharedPreferences.edit { putBoolean(KEY_DARK_THEME, isDark) }
+        sharedPreferences.edit {
+            putBoolean(KEY_DARK_THEME, isDark)
+        }
         _preferencesFlow.value = _preferencesFlow.value.copy(isDarkTheme = isDark)
     }
 
     fun setLanguage(languageCode: String, displayName: String) {
-        sharedPreferences.edit { putString(KEY_LANGUAGE, languageCode) }
+        sharedPreferences.edit {
+            putString(KEY_LANGUAGE, languageCode)
+        }
         _preferencesFlow.value = _preferencesFlow.value.copy(
             language = languageCode,
             languageDisplay = displayName
@@ -49,12 +74,17 @@ class PreferencesManager private constructor(context: Context) {
     }
 
     fun setCurrency(currencySymbol: String) {
-        sharedPreferences.edit { putString(KEY_CURRENCY, currencySymbol) }
+        sharedPreferences.edit {
+            putString(KEY_CURRENCY, currencySymbol)
+        }
+        // Actualizar el flow inmediatamente
         _preferencesFlow.value = _preferencesFlow.value.copy(currency = currencySymbol)
     }
 
     fun setPublicInfo(isPublic: Boolean) {
-        sharedPreferences.edit { putBoolean(KEY_PUBLIC_INFO, isPublic) }
+        sharedPreferences.edit {
+            putBoolean(KEY_PUBLIC_INFO, isPublic)
+        }
         _preferencesFlow.value = _preferencesFlow.value.copy(isPublicInfoEnabled = isPublic)
     }
 
