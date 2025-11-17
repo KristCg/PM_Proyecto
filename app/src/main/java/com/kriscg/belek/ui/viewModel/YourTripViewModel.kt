@@ -18,6 +18,7 @@ data class YourTripUiState(
     val serviciosSeleccionados: Set<String> = emptySet(),
     val preciosSeleccionados: Set<String> = emptySet(),
     val momentosSeleccionados: Set<String> = emptySet(),
+    val departamentoDestino: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -35,7 +36,12 @@ class YourTripViewModel(
         loadRecommendations()
     }
 
-    fun initializeFromEncuesta(tipo: String?, presupuesto: String?, ambientes: Set<String>?) {
+    fun initializeFromEncuesta(
+        tipo: String?,
+        presupuesto: String?,
+        ambientes: Set<String>?,
+        departamentoDestino: String?
+    ) {
         val tiposSet = if (!tipo.isNullOrBlank()) {
             val normalizedTipo = TranslationHelper.normalizeToSpanish(tipo)
             setOf(normalizedTipo)
@@ -61,7 +67,8 @@ class YourTripViewModel(
         _uiState.value = _uiState.value.copy(
             tiposSeleccionados = tiposSet,
             preciosSeleccionados = preciosSet,
-            ambientesSeleccionados = ambientesSet
+            ambientesSeleccionados = ambientesSet,
+            departamentoDestino = departamentoDestino
         )
 
         loadRecommendations()
@@ -180,7 +187,14 @@ class YourTripViewModel(
                                     lugar.momentoDia?.contains(momentoSeleccionado, ignoreCase = true) == true
                                 }
 
-                        matchTipo && matchAmbiente && matchServicios && matchPrecio && matchMomento
+                        val matchDepartamento = state.departamentoDestino.isNullOrBlank() ||
+                                (
+                                        !lugar.departamento.isNullOrBlank() &&
+                                                state.departamentoDestino.equals(lugar.departamento, ignoreCase = true)
+                                        )
+
+
+                        matchTipo && matchAmbiente && matchServicios && matchPrecio && matchMomento && matchDepartamento
                     }
 
                     _uiState.value = _uiState.value.copy(

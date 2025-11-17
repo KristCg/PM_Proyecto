@@ -49,6 +49,7 @@ androidx-compose-foundation-layout = { group = "androidx.compose.foundation", na
 androidx-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigation" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 google-maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "maps-compose" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
 
 
 [plugins]

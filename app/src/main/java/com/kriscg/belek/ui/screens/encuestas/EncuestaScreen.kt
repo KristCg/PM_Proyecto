@@ -1,9 +1,11 @@
 package com.kriscg.belek.ui.screens.encuestas
 
+import android.location.Geocoder
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material3.Button
@@ -34,9 +37,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,20 +51,42 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
 import com.kriscg.belek.R
 import com.kriscg.belek.ui.viewModel.EncuestaViewModel
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.coroutines.launch
+import java.util.Locale
+import com.kriscg.belek.rememberUserLocation
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.rememberScrollState
+import com.google.android.gms.maps.CameraUpdateFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncuestaScreen(
     modifier: Modifier = Modifier,
-    onVerOpcionesClick: (tipo: String?, presupuesto: String?, ambientes: String?) -> Unit = { _, _, _ -> },
+    onVerOpcionesClick: (
+        tipo: String?,
+        presupuesto: String?,
+        ambientes: String?,
+        departamento: String?
+    ) -> Unit = { _, _, _, _ -> },
     onBackClick: () -> Unit = {},
     viewModel: EncuestaViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var destinoCoords by remember { mutableStateOf<LatLng?>(null) }
+    val userLocation = rememberUserLocation()
 
     val tipos = listOf(
         stringResource(R.string.arqueologicos),
@@ -71,9 +100,9 @@ fun EncuestaScreen(
     )
 
     val presupuesto = listOf(
-        stringResource(R.string.alto),
-        stringResource(R.string.mediano),
-        stringResource(R.string.bajo)
+        stringResource(R.string.economico),
+        stringResource(R.string.gama_media),
+        stringResource(R.string.lujo)
     )
 
     val ambientes = listOf(
@@ -99,7 +128,12 @@ fun EncuestaScreen(
 
             println("DEBUG Encuesta: Navegando con - Tipo: ${uiState.tipoSeleccionado}, Presupuesto: ${uiState.presupuestoSeleccionado}, Ambientes: $ambientesJson")
 
-            onVerOpcionesClick(uiState.tipoSeleccionado, uiState.presupuestoSeleccionado, ambientesJson)
+            onVerOpcionesClick(
+                uiState.tipoSeleccionado,
+                uiState.presupuestoSeleccionado,
+                ambientesJson,
+                uiState.destinoDepartamento
+            )
             viewModel.resetState()
         }
     }
@@ -133,8 +167,8 @@ fun EncuestaScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Top,
             ) {
                 if (uiState.error != null) {
@@ -166,7 +200,7 @@ fun EncuestaScreen(
                     value = uiState.destino,
                     onValueChange = { viewModel.onDestinoChange(it) },
                     shape = RoundedCornerShape(10.dp),
-                    placeholder = { Text(stringResource(R.string.direccion)) },
+                    placeholder = { Text("Formato: lugar, departamento, pais") },
                     singleLine = true,
                     enabled = !uiState.isLoading,
                     modifier = Modifier.fillMaxWidth(),
@@ -179,15 +213,60 @@ fun EncuestaScreen(
 
                 Spacer(Modifier.height(10.dp))
 
-                Image(
-                    painter = painterResource(id = R.drawable.destino),
-                    contentDescription = stringResource(R.string.destino_viaje),
-                    contentScale = ContentScale.Fit,
-                    alpha = 0.3f,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            val destinoTexto = uiState.destino
+                            if (destinoTexto.isNotBlank()) {
+                                scope.launch {
+                                    try {
+                                        val geocoder = Geocoder(context, Locale.getDefault())
+                                        val results = geocoder.getFromLocationName(destinoTexto, 1)
+                                        val location = results?.firstOrNull()
+                                        if (location != null) {
+                                            destinoCoords = LatLng(location.latitude, location.longitude)
+                                            val departamento = location.adminArea
+
+                                            viewModel.onDestinoDepartamento(departamento)
+                                            viewModel.clearError()
+                                        } else {
+                                            viewModel.setError("No se encontró la dirección")
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                        viewModel.setError("Error al obtener la dirección")
+                                    }
+                                }
+                            }
+                        },
+                        enabled = !uiState.isLoading
+                    ) {
+                        Text(text = "Buscar")
+                    }
+
+                    Spacer(Modifier.width(10.dp))
+
+                    Button(
+                        onClick = {
+                            if (userLocation != null) {
+                                destinoCoords = userLocation
+                                viewModel.clearError()
+                            } else {
+                                viewModel.setError("No se pudo obtener tu ubicación")
+                            }
+                        },
+                        enabled = !uiState.isLoading
+                    ) {
+                        Text(text = "Usar mi ubicación")
+                    }
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                EncuestaMap(destinoCoords = destinoCoords)
 
                 Spacer(Modifier.height(30.dp))
 
@@ -288,6 +367,39 @@ fun EncuestaScreen(
         }
     }
 }
+@Composable
+fun EncuestaMap(destinoCoords: LatLng?) {
+    val defaultLocation = LatLng(14.6349, -90.5069)
+
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(defaultLocation, 10f)
+    }
+
+    val pin = destinoCoords ?: defaultLocation
+
+    LaunchedEffect(pin) {
+        cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(pin, 14f))
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(250.dp)
+    ) {
+        GoogleMap(
+            modifier = Modifier.matchParentSize(),
+            cameraPositionState = cameraPositionState
+        ){
+            if (destinoCoords != null) {
+                val markerState = rememberMarkerState(position = destinoCoords)
+                Marker(
+                    state = markerState
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 private fun FiltroBoton(

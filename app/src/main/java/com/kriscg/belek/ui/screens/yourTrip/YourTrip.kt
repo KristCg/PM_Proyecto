@@ -59,6 +59,7 @@ fun TuViajeScreen(
     tipo: String? = null,
     presupuesto: String? = null,
     ambientesJson: String? = null,
+    departamentoDestino: String? = null,
     onBackClick: () -> Unit = {},
     onLugarClick: (Int) -> Unit = {},
     viewModel: YourTripViewModel = viewModel()
@@ -91,7 +92,7 @@ fun TuViajeScreen(
 
             Log.d(TAG, "Ambientes finales: $ambientes")
             Log.d(TAG, "Llamando a initializeFromEncuesta...")
-            viewModel.initializeFromEncuesta(tipo, presupuesto, ambientes)
+            viewModel.initializeFromEncuesta(tipo, presupuesto, ambientes, departamentoDestino = departamentoDestino)
         }
     }
 

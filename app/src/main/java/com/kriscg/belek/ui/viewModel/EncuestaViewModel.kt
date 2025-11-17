@@ -19,7 +19,8 @@ data class EncuestaUiState(
     val ambientesSeleccionados: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val viajeCreado: Boolean = false
+    val viajeCreado: Boolean = false,
+    val destinoDepartamento: String = ""
 )
 
 class EncuestaViewModel : ViewModel() {
@@ -32,6 +33,12 @@ class EncuestaViewModel : ViewModel() {
 
     fun onDestinoChange(destino: String) {
         _uiState.value = _uiState.value.copy(destino = destino)
+    }
+
+    fun onDestinoDepartamento(departamento: String) {
+        _uiState.value = _uiState.value.copy(
+            destinoDepartamento = departamento
+        )
     }
 
     fun onTipoSelected(tipo: String) {
@@ -111,6 +118,9 @@ class EncuestaViewModel : ViewModel() {
         }
     }
 
+    fun setError(message: String) {
+        _uiState.value = _uiState.value.copy(error = message)
+    }
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
     }

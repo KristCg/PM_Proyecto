@@ -166,12 +166,13 @@ fun AppNavigation() {
         )
 
         encuestaNavigation(
-            onNavigateToYourTrip = { tipo, presupuesto, ambientes ->
+            onNavigateToYourTrip = { tipo, presupuesto, ambientes, departamento ->
                 navController.navigate(
                     YourTrip(
                         tipo = tipo,
                         presupuesto = presupuesto,
-                        ambientes = ambientes
+                        ambientes = ambientes,
+                        departamento = departamento
                     )
                 ) {
                     launchSingleTop = true

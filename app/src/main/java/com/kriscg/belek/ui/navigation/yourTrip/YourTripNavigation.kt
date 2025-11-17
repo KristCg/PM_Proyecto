@@ -10,7 +10,8 @@ import com.kriscg.belek.ui.screens.yourTrip.TuViajeScreen
 data class YourTrip(
     val tipo: String? = null,
     val presupuesto: String? = null,
-    val ambientes: String? = null
+    val ambientes: String? = null,
+    val departamento: String? = null
 )
 
 fun NavGraphBuilder.yourTripNavigation(

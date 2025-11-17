@@ -44,6 +44,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import coil.compose.AsyncImage
+import com.kriscg.belek.rememberUserLocation
 import com.kriscg.belek.ui.screens.details.GoogleMapView
 
 enum class MenuOption {
@@ -237,6 +238,7 @@ fun ListaContent(
 @Composable
 fun MapContent(
     lugares: List<LugarUI>,
+    userLocation: LatLng?,
     onLugarClick: (Int) -> Unit = {}
 ) {
     val defaultLocation = LatLng(14.6349, -90.5069)
@@ -253,10 +255,17 @@ fun MapContent(
         }
     }
 
-    val initialLocation = markers.firstOrNull()?.second ?: defaultLocation
+    val startLocation = remember(userLocation, markers) {
+        val inGuatemala = userLocation?.let { isInGuatemala(it) } ?: false
+        when {
+            userLocation != null && inGuatemala -> userLocation
+            markers.isNotEmpty() -> markers.first().second
+            else -> defaultLocation
+        }
+    }
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(initialLocation, 7f)
+        position = CameraPosition.fromLatLngZoom(startLocation, 8f)
     }
 
     Box(
@@ -305,7 +314,7 @@ fun ProfileDrawerContent(
                 .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.BottomStart
         ) {
-            
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -380,6 +389,18 @@ fun ProfileDrawerContent(
     }
 }
 
+private fun isInGuatemala(location: LatLng): Boolean {
+    val lat = location.latitude
+    val lng = location.longitude
+
+    val minLat = 13.5
+    val maxLat = 18.0
+    val minLng = -92.5
+    val maxLng = -88.0
+
+    return lat in minLat..maxLat && lng in minLng..maxLng
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -391,6 +412,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     var query by remember { mutableStateOf("") }
+    val userLocation = rememberUserLocation()
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -542,6 +564,7 @@ fun HomeScreen(
                             )
                             1 -> MapContent(
                                 lugares = uiState.lugares,
+                                userLocation = userLocation,
                                 onLugarClick = onLugarClick
                             )
                         }
